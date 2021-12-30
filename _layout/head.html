@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name=author content="{{ fill author }}">
+  <meta name=description content="{{ fill description }}">
+  <link rel=icon type=image/jpg href=/assets/bouletmaton.jpg>
+  <meta property="twitter:card" content="summary">
+  <meta property="og:site_name" content="{{ fill title }}">
+  <meta property="og:url" content="https://{{ website_url }}/">
+  <meta property="og:title" content="{{ fill title }}">
+  <meta property="og:description" content="{{ fill description }}">
+  <meta property="og:image" content="{{ fill avatar }}">
+  <meta property="twitter:image" content="{{ fill avatar }}">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:updated_time" content="{{ fill fd_mtime_raw }}">
+  {{if hasmath}} {{insert head_katex.html }}     {{end}}
+  {{if hascode}} {{insert head_highlight.html }}   {{end}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  {{isdef title}} <title>{{fill title}}</title>  {{end}}
+</head>
+<body>
+  {{insert header.html}}
+
+<!-- Content appended here -->

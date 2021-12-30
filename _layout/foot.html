@@ -1,0 +1,22 @@
+<!-- CONTENT ENDS HERE -->
+  {{ if hasmath }}
+      {{ insert foot_katex.html }}
+  {{ end }}
+  {{ if hascode }}
+      {{ insert foot_highlight.html }}
+  {{ end }}
+  <script src="/libs/burger.js"></script> 
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p> By <a href="https://jgthms.com">{{ fill author }}</a>. {{isnotpage /tag/*}}Last modified: {{ fill fd_mtime }}.{{end}} 
+      </p>
+      <p>
+          Website built with <strong>Bulma</strong>, <strong><a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a></strong> and the <a href="https://julialang.org"><strong>Julia</strong> programming language</a>.
+      </p>
+      <p>
+          The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
+      </p>
+    </div>
+  </footer>
+  </body>
+</html>
