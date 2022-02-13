@@ -22,5 +22,17 @@
 </head>
 <body>
   {{insert header.html}}
+  {{ isnotpage blog/articles/* }}
+  <div class="container">
+  {{ end }}
+  {{ ispage blog/articles/* }}
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h1 class="title">{{title}}</h1>
+      {{ isdef subtitle }}
+      <p class="subtitle">{{subtitle}}</p>
+      {{ end }}
+      <div class="content">
+  {{end}}
 
 <!-- Content appended here -->

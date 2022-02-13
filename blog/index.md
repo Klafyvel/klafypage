@@ -1,3 +1,23 @@
-@def title = "Some blog posts"
++++
+title = "My blog posts"
 
-# Nothing to see here yet, sorry
+include("blogposts.jl")
+
+contents_displayed = blogposts
++++
+
+~~~
+<div class="hero">
+  <div class="hero-body">
+    <div class="content">
+~~~
+# Blog posts hosted on this website
+
+
+~~~
+    </div>
+  </div>
+</div>
+~~~
+
+{{ insertcards contents_displayed }}

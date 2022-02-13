@@ -1,3 +1,6 @@
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 Franklin = "713c75ef-9fc9-4b05-94a9-213340da978e"
 NodeJS = "2bd173c7-0d6d-553b-b6af-13a54713934c"

@@ -5,7 +5,7 @@ Add here global page variables to use throughout your website.
 author = "Hugo Levy-Falk"
 description = """PhD student in Photophysics"""
 mintoclevel = 2
-div_content = "container"
+div_content = ""
 
 avatar = "assets/bouletmaton.jpg"
 
@@ -22,6 +22,7 @@ generate_rss = true
 website_title = "Klafyvel"
 website_descr = "Hugo Levy-Falk's web-page"
 website_url   = "klafyvel.me"
+rss_full_content = true
 +++
 
 <!--
@@ -30,3 +31,32 @@ Add here global latex commands to use throughout your pages.
 \newcommand{\R}{\mathbb R}
 \newcommand{\scal}[1]{\langle #1 \rangle}
 
+\newcommand{\blockcommand}[3]{
+~~~
+<div class="message #1">
+<div class="message-header">
+<p>#2</p>
+</div>
+<div class="message-body">
+~~~
+#3
+~~~
+</div>
+</div>
+~~~
+}
+
+\newcommand{\information}[1]{\blockcommand{is-info}{Information}{#1}}
+\newcommand{\question}[1]{\blockcommand{is-link}{Question}{#1}}
+\newcommand{\secret}[1]{\blockcommand{}{}{#1}}
+
+\newcommand{\figure}[2]{
+~~~
+<figure style="text-align=center;">
+~~~
+\figalt{#1}{#2}
+~~~
+<figcaption>#1</figcaption>
+</figure>
+~~~
+}

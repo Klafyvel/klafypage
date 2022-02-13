@@ -13,7 +13,7 @@ contents_displayed = contents
 ~~~
 # Contents available on the Internet
 
-I update thoses from time to time. Some are in english others are in french.
+I update theses from time to time. Some are in english others are in french.
 
 ~~~
     </div>
