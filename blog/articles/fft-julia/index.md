@@ -792,7 +792,9 @@ $$
 \end{aligned}
 $$
 
-With the organization we choose, we will have $\text{Re}(x[k]) = x[2k]$ and $\text{Im}(x[k]) = x[2k+1]$.
+With the organization we choose, we can replace $\text{Re}(x[k])$ with $x[2k]$
+and $\text{Im}(x[k])$ with $x[2k+1]$. We also note that we can replace
+$\text{Re}(x[k+n_1])$ with $x[2(k+n_1)]$ or even better $x[2k+n_2]$.
 
 The last step is the recombination of $h$ to find the final result. The formula in property 2 is rewritten after an unpleasant but uncomplicated calculation:
 
