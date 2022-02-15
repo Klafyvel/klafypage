@@ -759,8 +759,8 @@ The idea is to use the previous property by using the signal of the even and the
 Then we have:
 $$
 \begin{aligned}
-\hat{f}^{\text{even}}[k] &= \sum_{n=0}^{N/2-1}f[2k]e^{-2i\pi kn/(N/2)}\\
-\hat{f}^{\text{odd}}[k] &= \sum_{n=0}^{N/2-1}f[2k+1]e^{-2i\pi kn/(N/2)}
+\hat{f}^{\text{even}}[k] &= \sum_{n=0}^{N/2-1}f[2n]e^{-2i\pi kn/(N/2)}\\
+\hat{f}^{\text{odd}}[k] &= \sum_{n=0}^{N/2-1}f[2n+1]e^{-2i\pi kn/(N/2)}
 \end{aligned}
 $$
 We can recombine the two partial transforms. For $k=0...N/2-1$ :
