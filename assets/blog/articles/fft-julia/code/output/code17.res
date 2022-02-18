@@ -1,0 +1,1 @@
+reverse_bit_order_double! (generic function with 1 method)

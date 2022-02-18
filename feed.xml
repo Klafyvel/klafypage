@@ -1,0 +1,844 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:georss="http://www.georss.org/georss">
+
+  <channel>
+    <title>
+      <![CDATA[  Klafyvel  ]]>
+    </title>
+    <link> klafyvel.me </link>
+    <description>
+      <![CDATA[  Hugo Levy-Falk&#39;s web-page  ]]>
+    </description>
+    <atom:link
+      href="klafyvel.me/feed.xml"
+      rel="self"
+      type="application/rss+xml" />
+
+
+<item>
+  <title>
+    <![CDATA[  Let&#39;s play at implementing a fast Fourier transform&#33;  ]]>
+  </title>
+  <link> klafyvel.me/blog/articles/fft-julia/index.html </link>
+  <guid> klafyvel.me/blog/articles/fft-julia/index.html </guid>
+  <description>
+    <![CDATA[  An implementation of the FFT using Julia&#33;  ]]>
+  </description>  
+  
+  <content:encoded>
+    <![CDATA[  <p>The Fourier transform is an essential tool in many fields, be it in Physics, Signal Processing, or Mathematics. The method that is probably the most known to calculate it numerically is called the <strong>FFT</strong> for <em>Fast Fourier Transform</em>. In this little tutorial, I propose to try to understand and implement this algorithm in an efficient way. I will use the language <a href="https://julialang.org/">Julia</a>, but it should be possible to follow using other languages such as Python or C. We will compare the results obtained with those given by <a href="https://github.com/JuliaMath/FFTW.jl">the Julia port of the FFTW library</a>.</p>
+<p>This tutorial is intended for people who have already had the opportunity to encounter the Fourier transform, but who have not yet implemented it. It is largely based on the third edition of <a href="http://www.numerical.recipes/">Numerical Recipes</a><sup id="fnref:numerical">[1]</sup>, which I encourage you to consult: it is a gold mine.</p><div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  This content was originally publisher on <a href="https://zestedesavoir.com">zestedesavoir.com</a> in French. This is a quick translation &#40;using Deepl and a few manual modifications&#41;. If something seems off please tell me, as it is likely an error coming from the translation step. 
+</div>
+</div><p><table class="fndef" id="fndef:numerical">
+    <tr>
+        <td class="fndef-backref">[1]</td>
+        <td class="fndef-content">William H. Press, Saul A. Teukolsky, William T. Vetterling, &amp; Brian P. Flannery. &#40;2007&#41;. Numerical Recipes 3rd Edition: The Art of Scientific Computing &#40;3rd ed.&#41;. Cambridge University Press.</td>
+    </tr>
+</table>
+ <hr /></p>
+<h1 id="table_of_contents">Table of contents</h1>
+<div class="franklin-toc"><ol><li>Table of contents</li><li>Some reminders on the discrete Fourier transform<ol><li>The Fourier transform</li><li>From the Fourier transform to the discrete Fourier transform</li><li>Calculating the discrete Fourier transform</li><li>Why a fast Fourier transform algorithm?</li></ol></li><li>Implementing the FFT<ol><li>My first FFT</li><li>Analysis of the first implementation</li><li>Calculate the reverse permutation of the bits</li><li>My second FFT</li><li>The special case of a real signal<ol><li>Property 1: Compute the Fourier transform of two real functions at the same time</li><li>Property 2 : Compute the Fourier transform of a single function</li><li>Calculation in place</li></ol></li><li>An FFT for the reals</li><li>Optimization of trigonometric functions</li></ol></li></ol></div>
+<hr />
+<h1 id="some_reminders_on_the_discrete_fourier_transform">Some reminders on the discrete Fourier transform</h1>
+<p>The discrete Fourier transform is a transformation that follows from the Fourier transform and is, as its name indicates, adapted for discrete signals. In this first part I propose to discover how to build the discrete Fourier transform and then understand why the fast Fourier transform is useful.</p>
+<h2 id="the_fourier_transform">The Fourier transform</h2>
+<p>This tutorial is not intended to present the Fourier transform. However, there are several <a href="https://fr.wikipedia.org/wiki/Transformation_de_Fourier">definitions of the Fourier transform</a> and even within a single domain, several are sometimes used. We will use the following: for a function \(f\), its Fourier transform \(\hat{f}\) is defined by:</p>
+\[
+\hat{f}(\nu) = \int_{-\infty}^{+\infty}f(x)e^{-2i\nu x}\text{d}x
+\]
+<h2 id="from_the_fourier_transform_to_the_discrete_fourier_transform">From the Fourier transform to the discrete Fourier transform</h2>
+<p>As defined in the previous section, the Fourier transform of a signal is a continuous function of the variable \(\nu\). However, to represent any signal, we can only use a finite number of values. To do this we proceed in four steps:</p>
+<ol>
+<li><p>We <strong>sample</strong> &#40;or discretize&#41; the signal to analyze. This means that instead of working on the function that associates the value of the signal with the variable \(x\), we will work on a discrete series of values of the signal. In the case of the FFT, we sample with a constant step. For example if we look at a temporal signal like the value of a voltage read on a voltmeter, we could record the value at each <em>tic</em> of a watch.</p>
+</li>
+<li><p>We <strong>window</strong> the discretized signal. This means that we keep only a finite number of points of the signal.</p>
+</li>
+<li><p>We sample the Fourier transform of the signal to obtain the discrete Fourier transform.</p>
+</li>
+<li><p>We window the discrete Fourier transform for storage.</p>
+</li>
+</ol>
+<p>I suggest you to reason on a toy signal which will have the shape of a Gaussian. This makes the reasoning a little simpler because the Fourier transform of a real Gaussian is also a real Gaussian<sup id="fnref:gaussian">[2]</sup>, which simplifies the graphical representations. </p><figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/signal.svg" alt="The signal which will be used as an example"> 
+<figcaption> The signal which will be used as an example</figcaption>
+</figure><p>More formally, we have:</p>
+\[
+f(x) = e^{-x^2},\;\hat{f}(\nu)=\sqrt{\pi}e^{-(\pi\nu)^2}
+\]
+<p>Let&#39;s first look at the sampling. Mathematically, we can represent the process by the multiplication of the signal \(f\) by a Dirac comb of period \(T\), \(ш_T\). The Dirac comb is defined as follows:</p>
+\[
+ш_T(x) = \sum_{k=-\infty}^{+\infty}\delta(x-kT)
+\]
+<p>With \(\delta\) the <a href="https://fr.wikipedia.org/wiki/Distribution_de_Dirac">Dirac distribution</a>. Here is the plot that we can obtain if we represent \(f\) and \(g=ш_T\times f\) together:</p>
+<figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech.svg" alt="The signal and the sampled signal."> 
+<figcaption> The signal and the sampled signal.</figcaption>
+</figure><p>The Fourier transform of the new \(g\) function is written <sup id="fnref:math">[3]</sup> :</p>
+\[
+\begin{aligned}
+\hat{g}(\nu) &= \int_{-\infty}^{+\infty} \sum_{k=-\infty}^{+\infty} \delta(x-kT)
+f(x) e^{-2i\pi x \nu} \text{d}x \\
+&= \sum_{k=-\infty}^{+\infty}\int_{-\infty}^{+\infty}\delta(x-kT) f(x) e^{-2i\pi
+x \nu}\text{d}x \\
+&= \sum_{k=-\infty}^{+\infty}f(kT)e^{-2i\pi kT\nu}
+\end{aligned}
+\]
+<p>If we put \(f[k]=f(kT)\) the sampled signal and \(\nu_{text{ech}} = \frac{1}{T}\) the sampling frequency, we have:</p>
+\[
+\hat{g} = \sum_{k=-\infty}^{+\infty}f[k]e^{-2i\pi k\frac{\nu}{\nu_{\text{ech}}}}
+\]
+<p>If we plot the Fourier transform of the starting signal \(\hat{f}\) and that of the sampled signal \(\hat{g}\), we obtain the following plot:</p>
+<figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/tf_signal_ech.svg" alt="Fourier transform of the signal and its sampled
+signal"> 
+<figcaption> Fourier transform of the signal and its sampled
+signal</figcaption>
+</figure>
+<div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  We notice that the sampling of the signal has led to the periodization of its Fourier transform. This leads to an important property in signal processing: the <a href="https://en.wikipedia.org/wiki/Nyquist&#37;E2&#37;80&#37;93Shannon_sampling_theorem">Nyquist-Shanon criterion</a>, and one of its consequences, spectrum aliasing. I let you consult the Wikipedia article about this if you are interested, but you can have a quick idea of what happens if you draw the previous plot with a too large sampling: the bells of the sampled signal transform overlap.</p><p>
+<figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/tf_signal_ech_aliasing.svg" alt="Fourier transform of the signal and its sampled signal, illustrating
+aliasing."> 
+<figcaption> Fourier transform of the signal and its sampled signal, illustrating
+aliasing.</figcaption>
+</figure>
+ 
+</div>
+</div><p>We can then look at the windowing process. There are several methods that each have their advantages, but we will focus here only on the rectangular window. The principle is simple: we only look at the values of \(f\) for \(x\) between \(-x_0\) and \(+x_0\). This means that we multiply the function \(f\) by a gate function \(\Pi_{x_0}\) which verifies:</p>
+\[
+\Pi_{x_0}(x) =  \begin{aligned}
+1 & \;\text{if}\; x\in[-x_0,x_0] \\
+0 & \;\text{else}
+\end{aligned} 
+\]
+<p>Graphically, here is how we could represent \(h\) and \(f\) together.</p>
+<figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech_fen.svg" alt="Signal sampled and windowed"> 
+<figcaption> Signal sampled and windowed</figcaption>
+</figure><p>Concretely, this is equivalent to limiting the sum of the Dirac comb to a finite number of terms. We can then write the Fourier transform of \(h=Pi_{x_0} \times ш_T \times f\) :</p>
+\[
+\hat{h}(\nu) = \sum_{k=-k_0}^{+k_0}f[k]e^{-2i\pi k\frac{\nu}{\nu_{\text{ech}}}}
+\]<div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  The choice of windowing is not at all trivial, and can lead to unexpected problems if ignored. Here again I advise you to consult <a href="https://en.wikipedia.org/wiki/Window_function">the associated Wikipedia article</a> if needed. 
+</div>
+</div><p>We can now proceed to the last step: sampling the Fourier transform. Indeed, we can only store a finite number of values on our computer and, as defined, the function \(\hat{h}\) is continuous. We already know that it is periodic, with period \(\nu_{\text{ech}}\), so we can store only the values between \(0\) and \(\nu_{\text{ech}}\). We still have to sample it, and in particular to find the adequate sampling step. It is clear that we want the sampling to be as &quot;fine&quot; as possible, in order not to miss any detail of the Fourier transform&#33; For this we can take inspiration from what happened when we sampled \(f\): its Fourier transform became periodic, with period \(\nu_{\text{ech}}\). Now the inverse Fourier transform &#40;the operation that allows to recover the signal from its Fourier transform&#41; has similar properties to the Fourier transform. This means that if we sample \(\hat{h}\) with a sampling step \(\nu_s\), then its inverse Fourier transform becomes periodic with period \(1/\nu_s\). This gives a low limit on the values that \(\nu_s\) can take &#33; Indeed, if the inverse transform has a period smaller than the width of the window &#40;\(1/\nu_s < 2x_0\)&#41;, then the reconstructed signal taken between \(-x_0\) and \(x_0\) will not correspond to the initial signal \(f\) &#33; </p>
+<p>So we choose \(\nu_s = \frac{1}{2x_0}\) to discretize \(\hat{h}\). We use the same process of multiplication by a Dirac comb to discretize. In this way we obtain the Fourier transform of a new function \(l\) :</p>
+\[
+\begin{aligned}
+\hat{l}(\nu) = \sum_{n=-\infty}^{+\infty} \delta(\nu-n\nu_s) \sum_{k=-k_0}^{+k_0}f[k]e^{-2i\pi k\frac{n\nu_s}{\nu_{\text{ech}}}}
+\end{aligned}
+\]
+<p>This notation is a bit complicated, and we can be more interested in \(\hat{l}[n]=\hat{l}(n\nu_s)\) :</p>
+\[
+\begin{aligned}
+\hat{l}[n] = \hat{l}(n\nu_s) &=& \sum_{k=-k_0}^{+k_0}f[k]e^{-2i\pi k\frac{n\nu_s}{\nu_{\text{ech}}}}\\
+&=& \sum_{k=0}^{N-1}f[k]e^{-2i\pi k\frac{n}{N}}
+\end{aligned}
+\]
+<p>To get the last line, I re-indexed \(f[k]\) to start at 0, noting \(N\) the number of samples. I then assumed that the window size corresponded to an integer number of samples, i.e. that \(2x_0 = N\times T\), which is rewritten as \(N\times \nu_s = \nu_{\text{ech}}\). This expression is the <strong>discrete Fourier transform</strong> of the signal.</p>
+<figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech_fen_ech.svg" alt="Sampling the Fourier transform of the sampled signal to obtain the
+discrete Fourier transform"> 
+<figcaption> Sampling the Fourier transform of the sampled signal to obtain the
+discrete Fourier transform</figcaption>
+</figure>
+<div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  We can see that the sampling frequency does not enter into this equation, and there are many applications where we simply forget that this frequency exists. 
+</div>
+</div>
+<div class="message  is-link">
+<div class="message-header">
+<p> Question</p>
+</div>
+<div class="message-body">
+  There is one last point to clarify: this discrete transform is defined for an infinite &#40;discrete&#41; number of values of \(n\). How to store it on our computer ? 
+</div>
+</div><p>This problem is solved quite simply by windowing the discrete Fourier transform. Since the transform has been periodized by the sampling of the starting signal, it is enough to store one period of the transform to store all the information contained in it. The choice which is generally made is to keep all the points between O and \(\nu_{\text{ech}}\). This allows to use only positive \(n\), and one can easily reconstruct the plot of the transform if needed by inverting the first and the second half of the computed transform. In practice &#40;for the implementation&#41;, the discrete Fourier transform is thus given by :</p>
+\[
+\boxed{
+\forall n=0...(N-1),\; \hat{f}[n] = \sum_{k=0}^{N-1}f[k]e^{-2i\pi k\frac{n}{N}}
+}
+\]
+<p>To conclude on our example function, we obtain the following plot: </p>
+<figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech_fen_ech_fen.svg" alt="Windowing of the discrete Fourier transform for
+storage"> 
+<figcaption> Windowing of the discrete Fourier transform for
+storage</figcaption>
+</figure><h2 id="calculating_the_discrete_fourier_transform">Calculating the discrete Fourier transform</h2>
+<p>So we have at our disposal the expression of the discrete Fourier transform of a signal \(f\):</p>
+\[
+\hat{f}[n] = \sum_{k=0}^{N-1}f[k]e^{-2i\pi k\frac{n}{N}}
+\]
+<p>This s the expression of a matrix product which would look like this:</p>
+\[
+\hat{f} = \mathbf{M} \cdot f
+\]
+<p>with </p>
+\[
+\mathbf{M} = \begin{pmatrix} 
+1 & 1 & 1 & \dots & 1 \\
+1 & e^{-2i\pi 1 \times 1 / N} & e^{-2i\pi 2 \times 1 / N} & \dots & e^{-2i\pi
+1\times (N-1)/N} \\
+1 & e^{-2i\pi 1 \times 2 \times 1 / N} & e^{-2i\pi 2 \times 2 / N} & \ddots &
+\vdots\\
+\vdots & \vdots & \ddots & \ddots & e^{e-2i\pi (N-2)\times (N-1) / N}\\
+1 & e^{-2i\pi (N-1) \times 1/N} & \dots & e^{e-2i\pi (N-1) \times (N-2) / N} & e^{-2i\pi (N-1)\times (N-1) / N}
+\end{pmatrix}
+\]
+<p>Those in the know will notice that this is a <a href="https://en.wikipedia.org/wiki/Vandermonde_matrix">Vandermonde matrix</a> on the roots of the unit.</p>
+<p>So this calculation can be implemented relatively easily&#33;</p>
+<pre><code class="language-julia">function naive_dft&#40;x&#41;
+  N &#61; length&#40;x&#41;
+  k &#61; reshape&#40;0:&#40;N-1&#41;, 1, :&#41;
+  n &#61; 0:&#40;N-1&#41;
+  M &#61; @. exp&#40;-2im * π * k * n / N&#41;
+  M * x
+end</code></pre><div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  The macro <code>@.</code> line 5 allows to vectorize the computation of the expression it encompasses &#40;<code>exp&#40;-2im * π * k * n / N&#41;</code>&#41;. Indeed the function <code>exp</code> and the division and multiplication operators are defined for scalars. This macro is used to inform Julia that he should apply the scalar operations term by term. 
+</div>
+</div><p>And to check that it does indeed give the right result, it is enough to compare it with a reference implementation:</p>
+<pre><code class="language-julia">using FFTW</code></pre>
+<pre><code class="language-julia">a &#61; rand&#40;1024&#41;
+b &#61; fft&#40;a&#41;
+c &#61; naive_dft&#40;a&#41;
+b ≈ c</code></pre>
+<p>The last block evaluates to <code>true</code>, which confirms that we are not totally off the mark&#33;</p><div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  I use the <code>≈</code> operator to compare rather than <code>&#61;&#61;</code> to allow for small differences, especially because of rounding errors on floats. 
+</div>
+</div><p>However, is this code effective? We can check by comparing the memory footprint and execution speed.</p>
+<pre><code class="language-julia">using BenchmarkTools</code></pre>
+<pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  15.901 μs …  12.286 ms  ┊ GC (min … max): 0.00% … 64.47%
+ Time  (median):     19.401 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   26.009 μs ± 173.026 μs  ┊ GC (mean ± σ):  6.06% ±  0.91%      ▁▇▆█▁                                                     
+  ▂▂▃▆██████▄▃▂▂▂▂▂▂▂▂▂▂▁▂▁▁▂▂▂▂▂▂▂▃▃▄▄▅▅▅▄▅▃▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂ ▃
+  15.9 μs         Histogram: frequency by time         42.9 μs < Memory estimate: 34.19 KiB, allocs estimate: 34.</code></pre>
+<pre><code class="language-julia">@benchmark naive_dft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
+<p><pre><code class="plaintext code-output">BenchmarkTools.Trial: 192 samples with 1 evaluation.
+ Range (min … max):  24.251 ms … 35.149 ms  ┊ GC (min … max): 0.00% … 16.65%
+ Time  (median):     24.892 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   26.043 ms ±  2.776 ms  ┊ GC (mean ± σ):  2.49% ±  5.65%    ▄█▁                                                        
+  ▃▄███▂▁▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▂▃▃▃▁▁▁▁▁▁▁▁▃▃▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▃▃ ▂
+  24.3 ms         Histogram: frequency by time        34.9 ms < Memory estimate: 16.03 MiB, allocs estimate: 4.</code></pre> 
+<div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  As you can see, the maximum execution time of the reference implementation is two orders of magnitude higher than the average and median execution time. This is due to Julia&#39;s <em>Just in time</em> &#40;JIT&#41; compilation. If we were writing a real Julia library we could consider optimizing our code to compile quickly. We will just ignore the maximum execution time in this tutorial, which is only the compilation time for the first execution of the code. I refer you to <a href="https://juliaci.github.io/BenchmarkTools.jl/dev/">the <code>BenchmarkTools.jl</code> documentation</a> for more information. 
+</div>
+</div>
+</p>
+<p>So our implementation is <em>really</em> slow &#40;about 10,000 times&#41; and has a very high memory footprint &#40;about 500 times&#41; compared to the benchmark implementation&#33; To improve this, we will implement the fast Fourier transform.</p>
+<h2 id="why_a_fast_fourier_transform_algorithm">Why a fast Fourier transform algorithm?</h2>
+<p>Before getting our hands dirty again, let&#39;s first ask the question: is it really necessary to try to improve this algorithm?</p>
+<p>Before answering directly, let us look at some applications of the Fourier transform and the discrete Fourier transform.</p>
+<p>The Fourier transform has first of all a lot of theoretical applications, whether it is to solve differential equations, in signal processing or in quantum physics. It also has practical applications <a href="https://en.wikipedia.org/wiki/Fourier_optics">in optics</a> and <a href="https://en.wikipedia.org/wiki/Fourier-transform_spectroscopy">in spectroscopy</a>.</p>
+<p>The discrete Fourier transform also has many applications, in signal analysis, for data compression, <a href="https://www.youtube.com/watch?v&#61;h7apO7q16V0">multiplication of polynomials</a> or the computation of convolution products. </p>
+<p>Our naive implementation of the discrete Fourier transform has a time and memory complexity in \(\mathcal{O}(N^2)\) with \(N\) the size of the input sample, this is due to the storage of the matrix and the computation time of the matrix product. Concretely, if one wished to analyze a sound signal of 3 seconds sampled at 44kHz with data stored on simple precision floats &#40;4 bytes&#41;, it would thus be necessary approximately \(2\times(44000\times3)^2\times 4\approx100\;000\;000\;000\) bytes of memory &#40;a complex number is stored on 2 floats&#41; We can also estimate the time necessary to make this calculation. The median time for 1024 points was 38.367 ms. For our 3 seconds signal, it would take about \(38.867\times\left(\frac{44000\times3}{1024}\right)^2\approx 637\;537\) milliseconds, that is more than 10 minutes &#33;</p>
+<p>One can easily understand the interest to reduce the complexity of the calculation. In particular the fast Fourier transform algorithm &#40;used by the reference implementation&#41; has a complexity in \(\mathcal{O}(N\log N)\). According to our <em>benchmark</em>, the algorithm processes a 1024-point input in 23.785µs. It should therefore process the sound signal in about \(23.785\times\frac{44000\times\log(44000\times3)}{1024\times\log1024}\approx 5\;215\) microseconds, that is to say about 120000 times faster than our algorithm. We can really say that the <em>fast</em> of <em>Fast Fourier Transform</em> is not stolen &#33;</p>
+<p><table class="fndef" id="fndef:gaussian">
+    <tr>
+        <td class="fndef-backref">[2]</td>
+        <td class="fndef-content">Gaussians are said to be eigenfunctions of the Fourier transform.</td>
+    </tr>
+</table>
+<table class="fndef" id="fndef:math">
+    <tr>
+        <td class="fndef-backref">[3]</td>
+        <td class="fndef-content">It should be justified here that we can invert the sum and integral signs.</td>
+    </tr>
+</table>
+ <hr /></p>
+<p>We saw how the discrete Fourier transform was constructed, and then we naively tried to implement it. While this implementation is relatively simple to implement &#40;especially with a language like Julia that facilitates matrix manipulations&#41;, we also saw its limitations in terms of execution time and memory footprint.</p>
+<p>It&#39;s time to move on to the FFT itself&#33;</p>
+<h1 id="implementing_the_fft">Implementing the FFT</h1>
+<p>In this part we will implement the FFT by starting with a simple approach, and then making it more complex as we go along to try to calculate the Fourier transform of a real signal in the most efficient way possible. To compare the performances of our implementations, we will continue to compare with the FFTW implementation.</p>
+<h2 id="my_first_fft">My first FFT</h2>
+<p>We have previously found the expression of the discrete Fourier transform :</p>
+\[
+\hat{f}[n] = \sum_{k=0}^{N-1}f[k]e^{-2i\pi k\frac{n}{N}}
+\]
+<p>The trick at the heart of the FFT algorithm is to notice that if we try to cut this sum in two, separating the even and odd terms, we get &#40;assuming \(N\) is even&#41;, for \(n < N/2\) :</p>
+\[
+\begin{aligned}
+\hat{f}[n] &= \sum_{k=0}^{N}f[k]e^{-2i\pi k\frac{n}{N}}\\
+&= \sum_{m=0}^{N/2-1}f[2m]e^{-2i\pi 2m\frac{n}{N}} + \sum_{m=0}^{N/2-1}f[2m+1]e^{-2i\pi (2m+1)\frac{n}{N}}\\
+&= \sum_{m=0}^{N/2-1}f[2m]e^{-2i\pi m\frac{n}{N/2}} + e^{-2i\pi n/N}\sum_{m=0}^{N/2-1}f[2m+1]e^{-2i\pi m\frac{n}{N/2}}\\
+&= \hat{f}^\text{even}[n] + e^{-2i\pi n/N}\hat{f}^\text{odd}[n]
+\end{aligned}
+\]
+<p>where \(\hat{f}^\text{even}\) and \(\hat{f}^\text{odd}\) are the Fourier transforms of the sequence of even terms of \(f\) and of the sequence of odd terms of \(f\). We can therefore compute the first half of the Fourier transform of \(f\) by computing the Fourier transforms of these two sequences of length \(N/2\) and recombining them. Similarly, if we compute \(\hat{f}[n+N/2]\) we have :</p>
+\[
+\begin{aligned}
+\hat{f}[n+N/2] &= \sum_{m=0}^{N/2-1}f[2m]e^{-2i\pi m\frac{n+N/2}{N/2}} +
+e^{-2i\pi(n+N/2)/N}\sum_{m=0}^{N/2-1}f[2m+1]e^{-2i\pi m\frac{n+N/2}{N/2}}\\
+&= \sum_{m=0}^{N/2-1}f[2m]e^{-2i\pi m\frac{n}{N/2}} - e^{-2i\pi
+n/N}\sum_{m=0}^{N/2-1}f[2m+1]e^{-2i\pi m\frac{n}{N/2}}\\
+&= \hat{f}^\text{even}[n] - e^{-2i\pi n/N}\hat{f}^\text{odd}[n]
+\end{aligned}
+\]
+<p>This means that by computing two Fourier transforms of length \(N/2\), we are able to compute two elements of a Fourier transform of length \(N\). Assuming for simplicity that \(N\) is a power of two<sup id="fnref:power2">[4]</sup>, this naturally draws a recursive implementation of the FFT. According to the <a href="https://fr.wikipedia.org/wiki/Master_theorem">master theorem</a>, this algorithm will have complexity \(\mathcal{O}(N\log_2 N)\), which is much better than the first naive algorithm we implemented, which has complexity in \(\mathcal{O}(N^2)\).</p>
+<pre><code class="language-julia">function my_fft&#40;x&#41;
+  # Stop condition, the TF of an array of size 1 is this same array.
+  if length&#40;x&#41; &lt;&#61; 1
+    x
+  else
+    N &#61; length&#40;x&#41;
+    # Xᵒ contains the TF of odd terms and Xᵉ that of even terms.
+    # The subtlety being that Julia&#39;s tablals start at 1 and not 0.
+    Xᵒ &#61; my_fft&#40;x&#91;2:2:end&#93;&#41;
+    Xᵉ &#61; my_fft&#40;x&#91;1:2:end&#93;&#41;
+    factors &#61; @. exp&#40;-2im * π * &#40;0:&#40;N/2 - 1&#41;&#41; / N&#41;
+    &#91;Xᵉ .&#43; factors .* Xᵒ; Xᵉ .- factors .* Xᵒ&#93;
+  end
+end</code></pre>
+<p>We can check as before that code gives a fair result, then compare its runtime qualities with the reference implementation.</p>
+<pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  16.301 μs …  13.721 ms  ┊ GC (min … max): 0.00% … 62.47%
+ Time  (median):     19.700 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   25.441 μs ± 229.921 μs  ┊ GC (mean ± σ):  9.85% ±  1.09%        ▁▆▅█▄▂▂                                                 
+  ▂▂▃▃▆▇███████▆▅▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▃▃▃▃▃▂▂▂▂▂ ▃
+  16.3 μs         Histogram: frequency by time         36.7 μs < Memory estimate: 34.19 KiB, allocs estimate: 34.</code></pre>
+<pre><code class="language-julia">@benchmark my_fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 1727 samples with 1 evaluation.
+ Range (min … max):  2.473 ms … 21.689 ms  ┊ GC (min … max): 0.00% … 85.39%
+ Time  (median):     2.721 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   2.889 ms ±  1.737 ms  ┊ GC (mean ± σ):  5.56% ±  8.02%                         ▂▅█▇▄▃▁                              
+  ▁▁▁▁▁▁▁▁▂▁▂▁▂▂▂▂▂▃▂▃▄▄▆████████▆▅▄▃▂▂▁▂▁▁▁▂▁▂▂▂▂▂▂▂▁▂▁▁▁▁▁ ▂
+  2.47 ms        Histogram: frequency by time        3.01 ms < Memory estimate: 1.09 MiB, allocs estimate: 14322.</code></pre>
+<p>We can see that we have improved the execution time &#40;by a factor of 8&#41; and the memory footprint of the algorithm &#40;by a factor of 13&#41;, without getting closer to the reference implementation.</p>
+<h2 id="analysis_of_the_first_implementation">Analysis of the first implementation</h2>
+<p>Let&#39;s go back to the previous code: </p>
+<pre><code class="language-julia">function my_fft&#40;x&#41;
+  # Stop condition, the TF of an array of size 1 is this same array.
+  if length&#40;x&#41; &lt;&#61; 1
+    x
+  else
+    N &#61; length&#40;x&#41;
+    # Xᵒ contains the TF of odd terms and Xᵉ that of even terms.
+    # The subtlety being that Julia&#39;s tablals start at 1 and not 0.
+    Xᵒ &#61; my_fft&#40;x&#91;2:2:end&#93;&#41;
+    Xᵉ &#61; my_fft&#40;x&#91;1:2:end&#93;&#41;
+    factors &#61; @. exp&#40;-2im * π * &#40;0:&#40;N/2 - 1&#41;&#41; / N&#41;
+    &#91;Xᵉ .&#43; factors .* Xᵒ; Xᵉ .- factors .* Xᵒ&#93;
+  end
+end</code></pre>
+<p>And let&#39;s try to keep track of the memory allocations. For simplicity, we can assume that we are working on an array of 4 elements, <code>&#91;f&#91;0&#93;, f&#91;1&#93;, f&#91;2&#93;, f&#91;3&#93;&#93;</code>. The first call to <code>my_fft</code> keeps in memory the initial array, then launches the fft on two sub-arrays of size 2: <code>&#91;f&#91;0&#93;, f&#91;2&#93;&#93;</code> and <code>&#91;f&#91;1&#93;, f&#91;3&#93;&#93;</code>, then recursive calls keep in memory before recombining the arrays <code>&#91;f&#91;0&#93;&#93;</code> and <code>&#91;f&#91;2&#93;&#93;</code> then <code>&#91;f&#91;1&#93;&#93;</code> and <code>&#91;f&#91;3&#93;&#93;</code>. At most, we have \(log_2(N)\) arrays allocated with sizes divided by two each time. Not only do these arrays take up memory, but we also waste time allocating them&#33;</p>
+<p>However, if we observe the definition of the recurrence we use, at each step \(i\) &#40;i.e. for each array size, \(N/2^i\)&#41;, the sum of the intermediate array sizes is always \(N\). In other words, this gives the idea that we could save all these array allocations and use the same array all the time, provided that we make all the associations of arrays of the same size at the same step.</p>
+<p>Schematically we can represent the FFT process for an array with 8 elements as follows:</p><figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/radix2.png" alt="Illustration of the FFT process. The colors indicate if an element is treated as an even array &#40;red&#41; or an odd array &#40;green&#41;. The geometrical shapes allow to associate the elements which are in the same subarray. The multiplicative coefficients applied to the odd elements are also represented. This somewhat complicated diagram is the key to what follows. Feel free to spend some time to understand it."> 
+<figcaption> Illustration of the FFT process. The colors indicate if an element is treated as an even array (red) or an odd array (green). The geometrical shapes allow to associate the elements which are in the same subarray. The multiplicative coefficients applied to the odd elements are also represented. This somewhat complicated diagram is the key to what follows. Feel free to spend some time to understand it.</figcaption>
+</figure><p>How to read this diagram? Each column corresponds to a depth of the recurrence of our first FFT. The leftmost column corresponds to the deepest recurrence: we have cut the input array enough to arrive at subarrays of size 1. These 8 sub-tables are symbolized by 8 different geometrical shapes. We then go to the next level of recurrence. Each pair of sub-tables of size 1 must be combined to create a sub-table of size 2, which will be stored in the same memory cells as the two sub-tables of size 1. For example, we combine the subarray ▲ that contains \(f[0]\) and the subarray ◆ that contains \(f[4]\) using the formula demonstrated earlier to form the array \([f[0] + f[4], f[0] - f[4]]\), which I call in the following ◆, and store the two values in position 0 and 4. The colors of the arrows allow us to distinguish those bearing a coefficient &#40;which correspond to the treatment we give to the subarray \(\hat{f}^{\text{odd}}\) in the formulas of the previous section&#41;. After having constructed the 4 sub-tables of size 2, we can proceed to a new step of the recurrence to compute two sub-tables of size 4. Finally the last step of the recurrence combines the two subarrays of size 4 to compute the array of size 8 which contains the Fourier transform.</p>
+<p>Based on this scheme we can think of having a function whose main loop would calculate successively each column to arrive at the final result. In this way, all the calculations are performed on the same array and the number of allocations is minimized&#33; There is however a problem: we see that the \(\hat{f}[k]\) do not seem to be ordered at the end of the process. </p>
+<p>In reality, these \(\hat{f}[k]\) are ordered via a <a href="https://en.wikipedia.org/wiki/Bit-reversal_permutation">reverse bit permutation</a>. This means that if we write the indices \(k\) in binary, then reverse this writing &#40;the MSB becoming the LSB<sup id="fnref:MSB">[5]</sup>&#41;, we obtain the index at which \(\hat{f}[k]\) is found after the FFT algorithm. The permutation process is described by the following table in the case of a calculation on 8 elements.</p>
+<table><tr><th align="right">\(k\)</th><th align="right">Binary representation of \(k\)</th><th align="right">Reverse binary representation</th><th align="right">Index of \(\hat{f}[k]\)</th></tr><tr><td align="right">0</td><td align="right">000</td><td align="right">000</td><td align="right">0</td></tr><tr><td align="right">1</td><td align="right">001</td><td align="right">100</td><td align="right">4</td></tr><tr><td align="right">2</td><td align="right">010</td><td align="right">010</td><td align="right">2</td></tr><tr><td align="right">3</td><td align="right">011</td><td align="right">110</td><td align="right">6</td></tr><tr><td align="right">4</td><td align="right">100</td><td align="right">001</td><td align="right">1</td></tr><tr><td align="right">5</td><td align="right">101</td><td align="right">101</td><td align="right">5</td></tr><tr><td align="right">6</td><td align="right">110</td><td align="right">011</td><td align="right">3</td></tr><tr><td align="right">7</td><td align="right">111</td><td align="right">111</td><td align="right">7</td></tr></table>
+<p>If we know how to calculate the reverse permutation of the bits, we can simply reorder the array at the end of the process to obtain the right result. However, before jumping on the implementation, it is interesting to look at what happens if instead we reorder the input array <em>via</em> this permutation.</p><figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/radix2_inv.png" alt="Diagram of the FFT with a permuted input. The colors and symbols are the same as in the first illustration"> 
+<figcaption> Diagram of the FFT with a permuted input. The colors and symbols are the same as in the first illustration</figcaption>
+</figure><p>We can see that by proceeding in this way we have a simple ordering of the sub-tables. Since in any case it will be necessary to proceed to a permutation of the table, it is interesting to do it before the calculation of the FFT.</p>
+<h2 id="calculate_the_reverse_permutation_of_the_bits">Calculate the reverse permutation of the bits</h2>
+<p>We must therefore begin by being able to calculate the permutation. It is possible to perform the permutation in place simply once we know which elements to exchange. Several methods exist to perform the permutation, and a search in Google Scholar will give you an overview of the wealth of approaches.</p>
+<p>We can use a little trick here: since we are dealing only with arrays whose size is a power of 2, we can write the size \(N\) as \(N=2^p\). This means that the indices can be stored on \(p\) bits. We can then simply calculate the permuted index <em>via</em> binary operations. For example if \(p=10\) then the index \(797\) could be represented as: <code>1100011101</code>. </p>
+<p>We can separate the inversion process in several steps. First we exchange the 5 most significant bits and the 5 least significant bits. Then on each of the half-words we invert the two most significant bits and the two least significant bits &#40;the central bits do not change&#41;. Finally on the two bits words that we have just exchanged, we exchange the most significant bit and the least significant bit.</p>
+<p>An example of implementation would be the following:</p>
+<pre><code class="language-julia">bit_reverse&#40;::Val&#123;10&#125;, num&#41; &#61; begin
+  num &#61; &#40;&#40;num&amp;0x3e0&#41;&gt;&gt;5&#41;|&#40;&#40;num&amp;0x01f&#41;&lt;&lt;5&#41;
+  num &#61; &#40;&#40;num&amp;0x318&#41;&gt;&gt;3&#41;|&#40;num&amp;0x084&#41;|&#40;&#40;num&amp;0x063&#41;&lt;&lt;3&#41;
+  &#40;&#40;num&amp;0x252&#41;&gt;&gt;1&#41;|&#40;num&amp;0x084&#41;|&#40;&#40;num&amp;0x129&#41;&lt;&lt;1&#41;
+end</code></pre>
+<p>An equivalent algorithm can be applied for all values of \(p\), you just have to be careful not to change the central bits anymore when you have an odd number of bits in a half word. In the following there is an example for several word lengths.</p><div class="message  ">
+<div class="message-header">
+<p> </p>
+</div>
+<div class="message-body">
+</p>
+<pre><code class="language-julia">bit_reverse&#40;::Val&#123;64&#125;, num&#41; &#61; bit_reverse&#40;Val&#40;32&#41;, &#40;num&amp;0xffffffff00000000&#41;&gt;&gt;32&#41;|&#40;bit_reverse&#40;Val&#40;32&#41;, num&amp;0x00000000ffffff&#41;&lt;&lt;32&#41;
+bit_reverse&#40;::Val&#123;32&#125;, num&#41; &#61; bit_reverse&#40;Val&#40;16&#41;, &#40;num&amp;0xffff0000&#41;&gt;&gt;16&#41;|&#40;bit_reverse&#40;Val&#40;16&#41;, num&amp;0x0000ffff&#41;&lt;&lt;16&#41;
+bit_reverse&#40;::Val&#123;16&#125;, num&#41; &#61; bit_reverse&#40;Val&#40;8&#41;, &#40;num&amp;0xff00&#41;&gt;&gt;8&#41;|&#40;bit_reverse&#40;Val&#40;8&#41;, num&amp;0x00ff&#41;&lt;&lt;8&#41;
+bit_reverse&#40;::Val&#123;8&#125;, num&#41; &#61; bit_reverse&#40;Val&#40;4&#41;, &#40;num&amp;0xf0&#41;&gt;&gt;4&#41;|&#40;bit_reverse&#40;Val&#40;4&#41;, num&amp;0x0f&#41;&lt;&lt;4&#41;
+bit_reverse&#40;::Val&#123;4&#125;, num&#41; &#61;bit_reverse&#40;Val&#40;2&#41;, &#40;num&amp;0xc&#41;&gt;&gt;2&#41;|&#40;bit_reverse&#40;Val&#40;2&#41;, num&amp;0x3&#41;&lt;&lt;2&#41;
+bit_reverse&#40;::Val&#123;3&#125;, num&#41; &#61; &#40;&#40;num&amp;0x1&#41;&lt;&lt;2&#41;|&#40;&#40;num&amp;0x4&#41;&gt;&gt;2&#41;|&#40;num&amp;0x2&#41;
+bit_reverse&#40;::Val&#123;2&#125;, num&#41; &#61; &#40;&#40;num&amp;0x2&#41;&gt;&gt;1 &#41;|&#40;&#40;num&amp;0x1&#41;&lt;&lt;1&#41;
+bit_reverse&#40;::Val&#123;1&#125;, num&#41; &#61; num</code></pre>
+<p>
+</div>
+</div><p>Then we can do the permutation itself. The algorithm is relatively simple: just iterate over the array, calculate the inverted index of the current index and perform the inversion. The only subtlety is that the inversion must be performed only once per index of the array, so we discriminate by performing the inversion only if the current index is lower than the inverted index.</p>
+<pre><code class="language-julia">function reverse_bit_order&#33;&#40;X, order&#41;
+  N &#61; length&#40;X&#41;
+  for i in 0:&#40;N-1&#41;
+    j &#61; bit_reverse&#40;order, i&#41;
+    if i&lt;j
+      X&#91;i&#43;1&#93;,X&#91;j&#43;1&#93;&#61;X&#91;j&#43;1&#93;,X&#91;i&#43;1&#93;
+    end
+  end
+  X
+end</code></pre>
+<h2 id="my_second_fft">My second FFT</h2>
+<p>We are now sufficiently equipped to start a second implementation of the FFT. The first step will be to compute the reverse bit permutation. Then we will be able to compute the Fourier transform following the scheme shown previously. To do this we will store the size \(n_1\) of the sub-arrays and the number of cells \(n_2\) in the global array that separate two elements of the same index in the sub-arrays. The implementation can be done as follows:</p>
+<pre><code class="language-julia">function my_fft_2&#40;x&#41;
+  N &#61; length&#40;x&#41;
+  order &#61; Int&#40;log2&#40;N&#41;&#41;
+  @inbounds reverse_bit_order&#33;&#40;x, Val&#40;order&#41;&#41;
+  n₁ &#61; 0
+  n₂ &#61; 1
+  for i&#61;1:order # i done the number of the column we are in.
+    n₁ &#61; n₂ # n₁ &#61; 2ⁱ-¹
+    n₂ *&#61; 2 # n₂ &#61; 2ⁱ
+    
+    step_angle &#61; -2π/n₂
+    angle &#61; 0
+    for j&#61;1:n₁ # j is the index in Xᵉ and Xᵒ
+      factors &#61; exp&#40;im*angle&#41; # z &#61; exp&#40;-2im*π*&#40;j-1&#41;/n₂&#41;
+      angle &#43;&#61; step_angle # a &#61; -2π*&#40;j&#43;1&#41;/n₂
+      
+      # We combine the element j of each group of subarrays
+      for k&#61;j:n₂:N
+        @inbounds x&#91;k&#93;, x&#91;k&#43;n₁&#93; &#61; x&#91;k&#93; &#43; factors * x&#91;k&#43;n₁&#93;, x&#91;k&#93; - factors * x&#91;k&#43;n₁&#93;
+      end
+    end
+  end
+  x  
+end</code></pre><div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  There are two small subtleties due to Julia: arrays start numbering at 1, and we use the <code>@inbounds</code> macro to speed up the code a bit by disabling array overflow checks. 
+</div>
+</div><p>We can again measure the performance of this implementation. To keep the comparison fair, the <code>fft&#33;</code> function should be used instead of <code>fft</code>, as it works in place.</p>
+<pre><code class="language-julia">@benchmark fft&#33;&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; |&gt; complex&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  14.600 μs … 109.002 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     17.200 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   17.433 μs ±   2.252 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%            ▂█▂                                                 
+  ▂▂▂▂▃▃▄▆▆██████▅▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▂▂▁▁▁▁▁▁▁▁▁▂▁▁▂▁▂▂▂▂▂▂▂▂▂▂ ▃
+  14.6 μs         Histogram: frequency by time         28.2 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
+<pre><code class="language-julia">@benchmark my_fft_2&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  36.000 μs … 99.901 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     39.700 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   39.763 μs ±  2.674 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%  ▂▃     ▅▄ ▂█▂                                               ▁
+  ██▄▃▁▁▇██▆███▇▄▃▁▆▆▄▅▄▃▃▃▁▃▁▁▁▅▅▅▅▆▇▆▆▅▆▅▇▇▇▆▅▄▃▅▅▃▃▅▅▄▅▅▅▇ █
+  36 μs        Histogram: log(frequency) by time      54.7 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<p>We have significantly improved our execution time and memory footprint. We can see that there are zero bytes allocated &#40;this means that the compiler does not need to store the few intermediate variables in RAM&#41;, and that the execution time is close to that of the reference implementation.</p>
+<h2 id="the_special_case_of_a_real_signal">The special case of a real signal</h2>
+<p>So far we have reasoned about complex signals, which use two floats for storage. However in many situations we work with real value signals. Now in the case of a real signal, we know that \(\hat{f}\) verifies \(\hat{f}(-) = \hat{f}(\nu)}\). This means that half of the values we calculate are redundant. Although we calculate the Fourier transform of a real signal, the result can be a complex number. In order to save storage space, we can think of using this half of the array to store complex numbers. For this, two properties will help us.</p>
+<h3 id="property_1_compute_the_fourier_transform_of_two_real_functions_at_the_same_time">Property 1: Compute the Fourier transform of two real functions at the same time</h3>
+<p>If we have two real signals \(f\) and \(g\), we can define the complex signal \(h=f+ig\). We then have:</p>
+\[
+\hat{h}[k] = \sum_{n=0}^{N-1}(f[n]+ig[n])e^{-2i\pi kn/N}
+\]
+<p>We can notice that </p>
+\[
+\begin{aligned}
+\overline{\hat{h}[N-k]} &= \overline{\sum_{n=0}^{N-1}(f[n]+ig[n])e^{-2i\pi (N-k)n/N}}\\
+&=\sum_{n=0}^{N-1}(f[n]-ig[n])e^{-2i\pi kn/N}
+\end{aligned}
+\]
+<p>Combining the two we have</p>
+\[
+\begin{aligned}
+\hat{f}[k] &= \frac{1}{2}(\hat{h}[k] + \overline{\hat{h}[N-k]})\\
+\hat{g}[k] &= -\frac{i}{2}(\hat{h}[k] - \overline{\hat{h}[N-k]})\\
+\end{aligned}
+\]
+<h3 id="property_2_compute_the_fourier_transform_of_a_single_function">Property 2 : Compute the Fourier transform of a single function</h3>
+<p>The idea is to use the previous property by using the signal of the even and the odd elements. In other words for \(k=0...N/2-1\) we have \(h[k]=f[2k]+if[2k+1]\).</p>
+<p>Then we have:</p>
+\[
+\begin{aligned}
+\hat{f}^{\text{even}}[k] &= \sum_{n=0}^{N/2-1}f[2n]e^{-2i\pi kn/(N/2)}\\
+\hat{f}^{\text{odd}}[k] &= \sum_{n=0}^{N/2-1}f[2n+1]e^{-2i\pi kn/(N/2)}
+\end{aligned}
+\]
+<p>We can recombine the two partial transforms. For \(k=0...N/2-1\) :</p>
+\[
+\begin{aligned}
+\hat{f}[k] &= \hat{f}^{\text{even}}[k] + e^{-2i\pi k/N}\hat{f}^{\text{odd}}[k]\\
+\hat{f}[k+N/2] &= \hat{f}^{\text{even}}[k] - e^{-2i\pi k/N}\hat{f}^{\text{odd}}[k]
+\end{aligned}
+\]
+<p>Using the first property, we then have:</p>
+\[
+\begin{aligned}
+\hat{f}[k] &= \frac{1}{2}(\hat{h}[k] + \overline{\hat{h}[N/2-k]}) - \frac{i}{2}(\hat{h}[k] - \overline{\hat{h}[N/2-k]})e^{-2i\pi k/N} \\
+\hat{f}[k+N/2] &= \frac{1}{2}(\hat{h}[k] + \overline{\hat{h}[N/2-k]}) + \frac{i}{2}(\hat{h}[k] - \overline{\hat{h}[N/2-k]})e^{-2i\pi k/N}
+\end{aligned}
+\]
+<h3 id="calculation_in_place">Calculation in place</h3>
+<p>The array \(h\), which is presented previously, is complex-valued. However the input signal is real-valued and twice as long. The trick is to use two cells of the initial array to store a complex element of \(h\). It is useful to do the calculations with complex numbers before starting to write code. For the core of the FFT, if we note \(x_i\) the array at step \(i\) of the main loop, we have:</p>
+\[
+\begin{aligned}
+\text{Re}(x_{i+1}[k]) &= \text{Re}(x_{i}[k]) + \text{Re}(e^{-2i\pi j/n_2})\text{Re}(x_i[k+n_1]) - \text{Im}(e^{-2i\pi j/n_2})\text{Im}(x_i[k+n_1])\\
+\text{Re}(x_{i+1}[k]) &= \text{Re}(x_{i}[k]) + \text{Re}(e^{-2i\pi j/n_2})\text{Re}(x_i[k+n_1]) - \text{Im}(e^{-2i\pi j/n_2})\text{Im}(x_i[k+n_1])\\\\
+\text{Re}(x_{i+1}[k+n_1]) &= \text{Re}(x_{i}[k]) - \text{Re}(e^{-2i\pi j/n_2})\text{Re}(x_i[k+n_1]) + \text{Im}(e^{-2i\pi j/n_2})\text{Im}(x_i[k+n_1])\\
+\text{Re}(x_{i+1}[k+n_1]) &= \text{Re}(x_{i}[k]) - \text{Re}(e^{-2i\pi j/n_2})\text{Re}(x_i[k+n_1]) + \text{Im}(e^{-2i\pi j/n_2})\text{Im}(x_i[k+n_1])\\
+\end{aligned}
+\]
+<p>With the organization we choose, we can replace \(\text{Re}(x[k])\) with \(x[2k]\) and \(\text{Im}(x[k])\) with \(x[2k+1]\). We also note that we can replace \(\text{Re}(x[k+n_1])\) with \(x[2(k+n_1)]\) or even better \(x[2k+n_2]\).</p>
+<p>The last step is the recombination of \(h\) to find the final result. The formula in property 2 is rewritten after an unpleasant but uncomplicated calculation:</p>
+\[
+\begin{aligned}
+\text{Re}(\hat{x}[k]) &= 1/2 \times (\text{Re}(h[k]) + \text{Re}(h[N/2-k]) +
+\text{Im}(h[k])\text{Re}(e^{-2i\pi k/N}) + \text{Re}(h[k])\text{Im}(e^{-2i\pi
+k/N})... \\&...+ \text{Im}(h[N/2-k])\text{Re}(e^{-2i\pi k/N}) -
+\text{Re}(h[N/2-k])\text{Im}(e^{-2i\pi k/N})\\
+\text{Im}(\hat{x}[k]) &= 1/2 \times (\text{Im}(h[k]) - \text{Im}(h[N/2-k]) -
+\text{Re}(h[k])\text{Re}(e^{-2i\pi k/N}) + \text{Im}(h[k])\text{Im}(e^{-2i\pi
+k/N})...\\&... + \text{Re}(h[N/2-k])\text{Re}(e^{-2i\pi k/N}) + \text{Im}(h[N/2-k])\text{Im}(e^{-2i\pi k/N})
+\end{aligned}
+\]
+<p>There is a particular case where this formula does not work: when \(k=0\) we leave the array \(h\) which contains only \(N/2\) elements. However we can use the symmetry of the Fourier Transform to see that \(h[N/2]=h[0]\). The case \(k=0\) then simplifies enormously:</p>
+\[
+\begin{aligned}
+\text{Re}(\hat{x}[0]) &= \text{Re}(h[0]) + \text{Im}(h[0])\\
+\text{Im}(\hat{x}[0]) &= 0
+\end{aligned}
+\]
+<p>To perform the calculation in place, it is useful to be able to calculate \(\hat{x}[N/2-k]\) at the same time that we calculate \(\hat{x}[k]\). Reusing the previous results and the fact that \(e^{-2i\pi(N/2-k)/N}=-e^{2i\pi k/N}\), we find:</p>
+\[
+\begin{aligned}
+\text{Re}(\hat{x}[N/2-k]) &= 1/2 \times \Big(\text{Re}(h[N/2-k]) + \text{Re}(h[k]) -
+\text{Im}(h[N/2-k]]\text{Re}(e^{-2i\pi k/N})...\\&... +
+\text{Re}(h[N/2-k])\text{Im}(e^{-2i\pi k/N}) -
+\text{Im}(h[k])\text{Re}(e^{-2i\pi k/N}) - \text{Re}(h[k])\text{Im}(e^{-2i\pi
+k/N})\Big)\\\text{Im}(\hat{x}[N/2-k]) &= 1/2 \times \Big(\text{Im}(h[N/2-k]) - \text{Im}(h[k]) +
+\text{Re}(h[N/2-k])\text{Re}(e^{-2i\pi k/N})...\\&... +
+\text{Im}(h[N/2-k])\text{Im}(e^{-2i\pi k/N}) -
+\text{Re}(h[k])\text{Re}(e^{-2i\pi k/N}) + \text{Im}(h[k])\text{Im}(e^{-2i\pi
+k/N})\Big)
+\end{aligned}
+\]
+<p>After this little unpleasant moment, we are ready to implement a new version of the FFT&#33;</p>
+<h2 id="an_fft_for_the_reals">An FFT for the reals</h2>
+<p>Since the actual computation of the FFT is done on an array that is half the size of the input array, we need a function to compute the inverted index on 9 bits to be able to continue testing on 1024 points.</p>
+<pre><code class="language-julia">bit_reverse&#40;::Val&#123;9&#125;, num&#41; &#61; begin
+  num &#61; &#40;&#40;num&amp;0x1e0&#41;&gt;&gt;5&#41;|&#40;num&amp;0x010&#41;|&#40;&#40;num&amp;0x00f&#41;&lt;&lt;5&#41;
+  num &#61; &#40;&#40;num&amp;0x18c&#41;&gt;&gt;2&#41;|&#40;num&amp;0x010&#41;|&#40;&#40;num&amp;0x063&#41;&lt;&lt;2&#41;
+  &#40;&#40;num&amp;0x14a&#41;&gt;&gt;1&#41;|&#40;num&amp;0x010&#41;|&#40;&#40;num&amp;0x0a5&#41;&lt;&lt;1&#41;
+end</code></pre><div class="message  ">
+<div class="message-header">
+<p> </p>
+</div>
+<div class="message-body">
+  To complete the other methods of <code>bit_reverse</code> we can use the following implementations:</p>
+<pre><code class="language-julia">bit_reverse&#40;::Val&#123;31&#125;, num&#41; &#61; begin
+bit_reverse&#40;Val&#40;15&#41;, num&amp;0x7fff0000&gt;&gt;16&#41;| &#40;num&amp;0x00008000&#41; |&#40;bit_reverse&#40;Val&#40;7&#41;,num&amp;0x00007fff&#41;&lt;&lt;16&#41;
+end
+bit_reverse&#40;::Val&#123;15&#125;, num&#41; &#61; bit_reverse&#40;Val&#40;7&#41;, &#40;num&amp;0x7f00&#41;&gt;&gt;8&#41;| &#40;num&amp;0x0080&#41;|&#40;bit_reverse&#40;Val&#40;7&#41;,num&amp;0x007f&#41;&lt;&lt;8&#41;
+bit_reverse&#40;::Val&#123;7&#125;, num&#41; &#61; bit_reverse&#40;Val&#40;3&#41;, &#40;num&amp;0x70&#41;&gt;&gt;4 &#41;| &#40;num&amp;0x08&#41; |&#40;bit_reverse&#40;Val&#40;3&#41;, num&amp;0x07&#41;&lt;&lt;4&#41;</code></pre>
+<p>
+</div>
+</div><p>To take into account the specificities of the representation of the complexes we use, we implement a new version of <code>reverse_bit_order</code>.</p>
+<pre><code class="language-julia">function reverse_bit_order_double&#33;&#40;x, order&#41;
+  N &#61; length&#40;x&#41;
+  for i in 0:&#40;N÷2-1&#41;
+    j &#61; bit_reverse&#40;order, i&#41;
+    if i&lt;j
+      # swap real part
+      x&#91;2*i&#43;1&#93;,x&#91;2*j&#43;1&#93;&#61;x&#91;2*j&#43;1&#93;,x&#91;2*i&#43;1&#93;
+      # swap imaginary part
+      x&#91;2*i&#43;2&#93;,x&#91;2*j&#43;2&#93;&#61;x&#91;2*j&#43;2&#93;,x&#91;2*i&#43;2&#93;
+    end
+  end
+  x
+end</code></pre>
+<p>This leads to the new FFT implementation.</p>
+<pre><code class="language-julia">function my_fft_3&#40;x&#41;
+  N &#61; length&#40;x&#41; ÷ 2
+  order &#61; Int&#40;log2&#40;N&#41;&#41;
+  @inbounds reverse_bit_order_double&#33;&#40;x, Val&#40;order&#41;&#41;
+  
+  n₁ &#61; 0
+  n₂ &#61; 1
+  for i&#61;1:order # i done the number of the column we are in.
+    n₁ &#61; n₂ # n₁ &#61; 2ⁱ-¹
+    n₂ *&#61; 2 # n₂ &#61; 2ⁱ
+    
+    step_angle &#61; -2π/n₂
+    angle &#61; 0
+    for j&#61;1:n₁ # j is the index in Xᵉ and Xᵒ
+      re_factor &#61; cos&#40;angle&#41;
+      im_factor &#61; sin&#40;angle&#41;
+      angle &#43;&#61; step_angle # a &#61; -2π*j/n₂
+      
+      # We combine element j from each group of subarrays
+      @inbounds for k&#61;j:n₂:N
+        re_xₑ &#61; x&#91;2*k-1&#93;
+        im_xₑ &#61; x&#91;2*k&#93;
+        re_xₒ &#61; x&#91;2*&#40;k&#43;n₁&#41;-1&#93;
+        im_xₒ &#61; x&#91;2*&#40;k&#43;n₁&#41;&#93;
+        x&#91;2*k-1&#93; &#61; re_xₑ &#43; re_factor*re_xₒ - im_factor*im_xₒ
+        x&#91;2*k&#93; &#61; im_xₑ &#43; im_factor*re_xₒ &#43; re_factor*im_xₒ
+        x&#91;2*&#40;k&#43;n₁&#41;-1&#93; &#61; re_xₑ - re_factor*re_xₒ &#43; im_factor*im_xₒ
+        x&#91;2*&#40;k&#43;n₁&#41;&#93; &#61; im_xₑ - im_factor*re_xₒ - re_factor*im_xₒ      
+      end
+    end
+  end
+  # We build the final version of the TF
+  # N half the size of x
+  # Special case n&#61;0
+  x&#91;1&#93; &#61; x&#91;1&#93; &#43; x&#91;2&#93;
+  x&#91;2&#93; &#61; 0  
+  
+  step_angle &#61; -π/N
+  angle &#61; step_angle
+  @inbounds for n&#61;1:&#40;N÷2&#41;
+    re_factor &#61; cos&#40;angle&#41;
+    im_factor &#61; sin&#40;angle&#41;
+    re_h &#61; x&#91;2*n&#43;1&#93;
+    im_h &#61; x&#91;2*n&#43;2&#93;
+    re_h_sym &#61; x&#91;2*&#40;N-n&#41;&#43;1&#93;
+    im_h_sym &#61; x&#91;2*&#40;N-n&#41;&#43;2&#93;
+    x&#91;2*n&#43;1&#93; &#61; 1/2*&#40;re_h &#43; re_h_sym &#43; im_h*re_factor &#43; re_h*im_factor &#43; im_h_sym*re_factor - re_h_sym*im_factor&#41;
+    x&#91;2*n&#43;2&#93; &#61; 1/2*&#40;im_h - im_h_sym - re_h*re_factor &#43; im_h*im_factor &#43; re_h_sym*re_factor &#43; im_h_sym*im_factor&#41;
+    x&#91;2*&#40;N-n&#41;&#43;1&#93; &#61; 1/2*&#40;re_h_sym &#43; re_h - im_h_sym*re_factor &#43; re_h_sym*im_factor - im_h*re_factor - re_h*im_factor&#41;
+    x&#91;2*&#40;N-n&#41;&#43;2&#93; &#61; 1/2*&#40;im_h_sym - im_h &#43; re_h_sym*re_factor &#43; im_h_sym*im_factor - re_h*re_factor &#43; im_h*im_factor&#41;
+    angle &#43;&#61; step_angle
+  end
+  x
+end</code></pre>
+<p>We can now check the performance of the new implementation:</p>
+<pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  15.000 μs …  16.715 ms  ┊ GC (min … max): 0.00% … 54.79%
+ Time  (median):     17.100 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   20.676 μs ± 235.605 μs  ┊ GC (mean ± σ):  8.94% ±  0.78%         ▇▆▆█                                                   
+  ▂▃▃▅▄▅▇█████▇▄▄▃▃▃▂▂▂▂▂▂▂▂▂▁▂▁▁▁▂▂▁▁▁▁▂▁▁▁▂▁▁▁▁▂▁▂▂▂▂▂▂▂▂▂▂▂ ▃
+  15 μs           Histogram: frequency by time         28.7 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
+<pre><code class="language-julia">@benchmark my_fft_3&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  19.801 μs … 53.901 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     22.000 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   21.860 μs ±  2.018 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%            █                                                  
+  ▂▆▄▂▂▁▄▇▂▄█▅▂▂▂▁▂▂▂▁▂▂▂▂▁▁▂▁▁▁▁▁▁▂▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂▁▂▂▂▂▂▂▂▂▂ ▂
+  19.8 μs         Histogram: frequency by time        32.5 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<p>This is a very good result&#33;</p>
+<h2 id="optimization_of_trigonometric_functions">Optimization of trigonometric functions</h2>
+<p>If we analyze the execution of <code>my_fft_3</code> using Julia&#39;s <em>profiler</em>, we can see that most of the time is spent computing trigonometric functions and creating the <code>StepRange</code> objects used in <code>for</code> loops. The second problem can be easily circumvented by using <code>while</code> loops. For the first one, in <em>Numerical Recipes</em> we can read &#40;section 5.4 &quot;<em>Recurrence Relations and Clenshaw&#39;s Recurrence Formula</em>&quot;, page 219 of the third edition&#41;:</p>
+<blockquote>
+<p>If your program&#39;s running time is dominated by evaluating trigonometric functions, you are probably doing something wrong.  Trig functions whose arguments form a linear sequence \(\theta = \theta_0 + n\delta, n=0,1,2...\) ,  are efficiently calculated by the recurrence </p>
+</blockquote>
+\[\begin{aligned}\cos(\theta + \delta) &= \cos\theta - [\alpha \cos\theta + \beta\sin\theta]\\\sin(\theta + \delta) &= \sin\theta - [\alpha\sin\theta - \beta\cos\theta]\end{aligned}\]
+<blockquote>
+<p>Where \(\alpha\) and \(\beta\) are the precomputed coefficients \(\alpha = 2\sin^2\left(\frac{\delta}{2}\right),\;\beta=sin\delta\)</p>
+</blockquote><div class="message  ">
+<div class="message-header">
+<p> </p>
+</div>
+<div class="message-body">
+  This can be shown using the classical trigonometric identities:</p>
+\[
+\begin{aligned}
+\cos(\theta+\delta) =& \cos\theta\cos\delta - \sin\theta\sin\delta\\
+=& \cos\theta\left[2\cos^2\frac{\delta}{2} - 1\right] - \sin\theta\sin\delta\\
+=& \cos\theta\left[2(1-\sin^2\frac{\delta}{2}) - 1\right] - \sin\theta\sin\delta\\
+=& \cos\theta - [\underbrace{\sin^2\frac{\delta}{2}}_{=\alpha}\cos\theta + \underbrace{\sin\delta}_{=\beta}\sin\theta]
+\end{aligned}
+\]
+<p>And with \(\sin x = \cos(x-\frac{\pi}{2})\), we have directly the second formula. 
+</div>
+</div><p>This relation is also interesting in terms of numerical stability. We can directly implement a final version of our FFT using these relations.</p>
+<pre><code class="language-julia">function my_fft_4&#40;x&#41;
+  N &#61; length&#40;x&#41; ÷ 2
+  order &#61; Int&#40;log2&#40;N&#41;&#41;
+  @inbounds reverse_bit_order_double&#33;&#40;x, Val&#40;order&#41;&#41;
+  
+  n₁ &#61; 0
+  n₂ &#61; 1
+  
+    i&#61;1
+  while i&lt;&#61;order # i done the number of the column we are in.
+    n₁ &#61; n₂ # n₁ &#61; 2ⁱ-¹
+    n₂ *&#61; 2 # n₂ &#61; 2ⁱ
+    
+    step_angle &#61; -2π/n₂
+    α &#61; 2sin&#40;step_angle/2&#41;^2
+    β &#61; sin&#40;step_angle&#41;
+    cj &#61; 1
+    sj &#61; 0
+    j &#61; 1
+    while j&lt;&#61;n₁ # j is the index in Xᵉ and Xᵒ
+      # We combine the element j from each group of subarrays
+      k &#61; j
+      @inbounds while k&lt;&#61;N
+        re_xₑ &#61; x&#91;2*k-1&#93;
+        im_xₑ &#61; x&#91;2*k&#93;
+        re_xₒ &#61; x&#91;2*&#40;k&#43;n₁&#41;-1&#93;
+        im_xₒ &#61; x&#91;2*&#40;k&#43;n₁&#41;&#93;
+        x&#91;2*k-1&#93; &#61; re_xₑ &#43; cj*re_xₒ - sj*im_xₒ
+        x&#91;2*k&#93; &#61; im_xₑ &#43; sj*re_xₒ &#43; cj*im_xₒ
+        x&#91;2*&#40;k&#43;n₁&#41;-1&#93; &#61; re_xₑ - cj*re_xₒ &#43; sj*im_xₒ
+        x&#91;2*&#40;k&#43;n₁&#41;&#93; &#61; im_xₑ - sj*re_xₒ - cj*im_xₒ       
+        
+        k &#43;&#61; n₂
+      end
+      # We compute the next cosine and sine.
+      cj, sj &#61; cj - &#40;α*cj &#43; β*sj&#41;, sj - &#40;α*sj-β*cj&#41;
+      j&#43;&#61;1
+    end
+    i &#43;&#61; 1
+  end
+  # We build the final version of the TF
+  # N half the size of x
+  # Special case n&#61;0
+  x&#91;1&#93; &#61; x&#91;1&#93; &#43; x&#91;2&#93;
+  x&#91;2&#93; &#61; 0  
+  
+  step_angle &#61; -π/N
+  α &#61; 2sin&#40;step_angle/2&#41;^2
+  β &#61; sin&#40;step_angle&#41;
+  cj &#61; 1
+  sj &#61; 0
+  j &#61; 1
+  @inbounds while j&lt;&#61;&#40;N÷2&#41;
+    # We calculate the cosine and sine before the main calculation here to compensate for the first
+    # step of the loop that was skipped.
+    cj, sj &#61; cj - &#40;α*cj &#43; β*sj&#41;, sj - &#40;α*sj-β*cj&#41;
+    
+    re_h &#61; x&#91;2*j&#43;1&#93;
+    im_h &#61; x&#91;2*j&#43;2&#93;
+    re_h_sym &#61; x&#91;2*&#40;N-j&#41;&#43;1&#93;
+    im_h_sym &#61; x&#91;2*&#40;N-j&#41;&#43;2&#93;
+    x&#91;2*j&#43;1&#93; &#61; 1/2*&#40;re_h &#43; re_h_sym &#43; im_h*cj &#43; re_h*sj &#43; im_h_sym*cj - re_h_sym*sj&#41;
+    x&#91;2*j&#43;2&#93; &#61; 1/2*&#40;im_h - im_h_sym - re_h*cj &#43; im_h*sj &#43; re_h_sym*cj &#43; im_h_sym*sj&#41;
+    x&#91;2*&#40;N-j&#41;&#43;1&#93; &#61; 1/2*&#40;re_h_sym &#43; re_h - im_h_sym*cj &#43; re_h_sym*sj - im_h*cj - re_h*sj&#41;
+    x&#91;2*&#40;N-j&#41;&#43;2&#93; &#61; 1/2*&#40;im_h_sym - im_h &#43; re_h_sym*cj &#43; im_h_sym*sj - re_h*cj &#43; im_h*sj&#41;
+    
+    j &#43;&#61; 1
+  end
+  x
+end</code></pre>
+<p>We can check that we always get the right result: </p>
+<pre><code class="language-julia">a &#61; rand&#40;1024&#41;
+b &#61; fft&#40;a&#41;
+c &#61; my_fft_4&#40;a&#41;
+real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;</code></pre>
+<pre><code class="plaintext code-output">true</code></pre>
+<p>In terms of performance, we finally managed to outperform the reference implementation&#33;</p>
+<pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  15.100 μs …  17.446 ms  ┊ GC (min … max): 0.00% … 55.04%
+ Time  (median):     17.200 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   20.968 μs ± 244.052 μs  ┊ GC (mean ± σ):  9.01% ±  0.77%        ▅▅▅█ ▁                                                  
+  ▃▃▄▃▅▆██████▅▅▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▂▁▁▁▁▂▁▁▁▁▁▁▁▁▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂ ▃
+  15.1 μs         Histogram: frequency by time         29.7 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
+<pre><code class="language-julia">@benchmark my_fft_4&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):   9.300 μs … 26.700 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     10.300 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   10.320 μs ±  1.125 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%     ▂   ▁               ▃   ▆   ▁   ▅   █   ▄                ▁
+  ▄▁▁█▁▁▁█▁▁▁▃▁▁▁▁▁▁▁▁▁▁▁█▁▁▁█▁▁▁█▁▁▁█▁▁▁█▁▁▁█▁▁▁▆▁▁▁▆▁▁▁▆▁▁▄ █
+  9.3 μs       Histogram: log(frequency) by time      10.8 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<p><table class="fndef" id="fndef:power2">
+    <tr>
+        <td class="fndef-backref">[4]</td>
+        <td class="fndef-content">In practice we can always reduce to this case by stuffing zeros.</td>
+    </tr>
+</table>
+<table class="fndef" id="fndef:MSB">
+    <tr>
+        <td class="fndef-backref">[5]</td>
+        <td class="fndef-content">MSB and LSB are the acronyms of <em>Most Significant Bit</em> and <em>Least Significant Bit</em>. In a number represented on \(n\) bits, the MSB is the bit that carries the information on the highest power of 2 &#40;\(2^{n-1}\)&#41; while the LSB carries the information on the lowest power of 2 &#40;\(2^0\)&#41;. Concretely the MSB is the leftmost bit of the binary representation of a number, while the LSB is the rightmost.</td>
+    </tr>
+</table>
+</p>
+<hr />
+<p>If we compare the different implementations proposed in this tutorial as well as the two reference implementations, and then plot the median values of execution time, memory footprint and number of allocations, we obtain the following plot:</p><figure style="text-align=center;">
+ <img src="klafyvel.me/assets/blog/articles/fft-julia/output/benchmark.svg" alt="Benchmark of the different solutions: median
+values."> 
+<figcaption> Benchmark of the different solutions: median
+values.</figcaption>
+</figure><p>I added the function <code>FFTW.rfft</code> which is supposed to be optimized for real. We can see that in reality, unless you work on very large arrays, it does not bring much performance.</p>
+<p>We can see that the last versions of the algorithm are very good in terms of number of allocations and memory footprint. In terms of execution time, the reference implementation ends up being faster on very large arrays.</p>
+<p>How can we explain these differences, especially between our latest implementation and the implementation in FFTW? Some elements of answer:</p>
+<ol>
+<li><p>FFTW solves a much larger problem. Indeed our implementation is &quot;naive&quot; for example in the sense that it can only work on input arrays whose size is a power of two. And even then, only those for which we have taken the trouble to implement a method of the <code>bit_reverse</code> function. The reverse bit permutation problem is a bit more complicated to solve in the general case. Moreover FFTW performs well on many types of architectures, offers discrete Fourier transforms in multiple dimensions etc... If you are interested in the subject, I recommend <a href="https://www.researchgate.net/publication/2986439_The_Design_and_implementation_of_FFTW3">this article</a><sup id="fnref:fftw">[6]</sup> which presents the internal workings of FFTW.</p>
+</li>
+<li><p>The representation of the complex numbers plays in our favor. Indeed we avoid our implementation to do any conversion, this is seen in particular in the test codes where we take care of recovering the real part and the imaginary part of the transform:</p>
+</li>
+</ol>
+<pre><code class="language-julia">real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;</code></pre>
+<pre><code class="plaintext code-output">true</code></pre>
+<ol start="3">
+<li><p>Our algorithm was not thought of with numerical stability in mind. This is an aspect that could still be improved. Also, we did not test it on anything other than noise. However, the following block presents some tests that suggest that it &quot;behaves well&quot; for some test functions.</p>
+</li>
+</ol><div class="message  ">
+<div class="message-header">
+<p> </p>
+</div>
+<div class="message-body">
+</p>
+<pre><code class="language-julia">function test_signal&#40;s&#41;
+b &#61; fft&#40;s&#41;
+c &#61; my_fft_4&#40;s&#41;
+real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;
+endt &#61; range&#40;-10, 10; length&#61;1024&#41;
+y &#61; @. exp&#40;-t^2&#41;
+noise &#61; rand&#40;1024&#41;
+test_signal&#40;y .&#43; noise&#41;</code></pre>
+<pre><code class="plaintext code-output">true</code></pre>
+<pre><code class="language-julia">t &#61; range&#40;-10, 10; length&#61;1024&#41;
+y &#61; @. sin&#40;t&#41;
+noise &#61; rand&#40;1024&#41;
+test_signal&#40;y .&#43; noise&#41;</code></pre>
+<p><pre><code class="plaintext code-output">true</code></pre> 
+</div>
+</div><p>These simplifications and special cases allow our implementation to gain a lot in speed. This makes the implementation of FFTW all the more remarkable, as it still performs very well&#33;</p>
+<table class="fndef" id="fndef:fftw">
+    <tr>
+        <td class="fndef-backref">[6]</td>
+        <td class="fndef-content">Frigo, Matteo &amp; Johnson, S.G.. &#40;2005&#41;. The Design and implementation of FFTW3. Proceedings of the IEEE. 93. 216 - 231. 10.1109/JPROC.2004.840301.</td>
+    </tr>
+</table><hr />
+<p>At the end of this tutorial I hope to have helped you to understand the mechanisms that make the FFT computation work, and to have shown how to implement it efficiently, modulo some simplifications. Personally, writing this tutorial has allowed me to realize the great qualities of FFTW, the reference implementation, that I use every day in my work&#33;</p>
+<p>This should allow you to understand that for some use cases, it can be interesting to implement and optimize your own FFT. An application that has been little discussed in this tutorial is the calculation of convolution products. An efficient method when convolving signals of comparable length is to do so by multiplying the two Fourier transforms and then taking the inverse Fourier transform. In this case, since the multiplication is done term by term, it is not necessary that the Fourier transform is ordered. One could therefore imagine a special implementation that would skip the reverse bit permutation part.</p>
+<p>Another improvement that could be made concerns the calculation of the inverse Fourier transform. It is a very similar calculation &#40;only the multiplicative coefficients change&#41;, and can be a good exercise to experiment with the codes given in this tutorial.</p>
+<p>Finally, I want to thank @Gawaboumga, @Næ, @zeqL and @luxera for their feedback on the beta of this tutorial, and @Gabbro for the validation on <a href="https://zestedesavoir.com">zestedesavoir.com</a>&#33;</p>
+ ]]>
+  </content:encoded>
+    
+  <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>Hugo Levy-Falk</atom:name>
+  </atom:author>
+        
+</item>
+</channel></rss>
