@@ -867,7 +867,7 @@ To take into account the specificities of the representation of the complexes we
 ```julia:./code/code17.jl
 function reverse_bit_order_double!(x, order)
   N = length(x)
-  for i in 0:(N-1)
+  for i in 0:(N÷2-1)
     j = bit_reverse(order, i)
     if i<j
       # swap real part
@@ -1175,6 +1175,7 @@ theme_benchmark = Theme(
     markersize=24,
   )
 )
+
 set_theme!(theme_benchmark)
 ax_time = Axis(
   fig[1,1],
