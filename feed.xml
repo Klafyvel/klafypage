@@ -241,18 +241,18 @@ b ≈ c</code></pre>
 <pre><code class="language-julia">using BenchmarkTools</code></pre>
 <pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  15.901 μs …  12.286 ms  ┊ GC (min … max): 0.00% … 64.47%
- Time  (median):     19.401 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   26.009 μs ± 173.026 μs  ┊ GC (mean ± σ):  6.06% ±  0.91%      ▁▇▆█▁                                                     
-  ▂▂▃▆██████▄▃▂▂▂▂▂▂▂▂▂▂▁▂▁▁▂▂▂▂▂▂▂▃▃▄▄▅▅▅▄▅▃▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂ ▃
-  15.9 μs         Histogram: frequency by time         42.9 μs < Memory estimate: 34.19 KiB, allocs estimate: 34.</code></pre>
+ Range (min … max):  16.800 μs …  9.841 ms  ┊ GC (min … max): 0.00% … 64.74%
+ Time  (median):     18.900 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   20.112 μs ± 98.345 μs  ┊ GC (mean ± σ):  3.17% ±  0.65%                  ▁ ▂▃▆▆▇ ███▇▇ ▅▄▂▁▁                          
+  ▂▂▂▂▃▁▃▄▄▅▅▁▆▆▇██▁█████▁█████▁█████▁█▇▆▆▅▁▅▄▃▄▃▁▃▃▃▂▂▁▂▂▂▂▂ ▄
+  16.8 μs         Histogram: frequency by time        21.7 μs < Memory estimate: 34.19 KiB, allocs estimate: 34.</code></pre>
 <pre><code class="language-julia">@benchmark naive_dft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<p><pre><code class="plaintext code-output">BenchmarkTools.Trial: 192 samples with 1 evaluation.
- Range (min … max):  24.251 ms … 35.149 ms  ┊ GC (min … max): 0.00% … 16.65%
- Time  (median):     24.892 ms              ┊ GC (median):    0.00%
- Time  (mean ± σ):   26.043 ms ±  2.776 ms  ┊ GC (mean ± σ):  2.49% ±  5.65%    ▄█▁                                                        
-  ▃▄███▂▁▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▂▃▃▃▁▁▁▁▁▁▁▁▃▃▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▃▃ ▂
-  24.3 ms         Histogram: frequency by time        34.9 ms < Memory estimate: 16.03 MiB, allocs estimate: 4.</code></pre> 
+<p><pre><code class="plaintext code-output">BenchmarkTools.Trial: 146 samples with 1 evaluation.
+ Range (min … max):  32.644 ms … 69.256 ms  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     32.790 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   34.266 ms ±  4.368 ms  ┊ GC (mean ± σ):  1.49% ± 3.66%  █     ▁                                                      
+  █▁▁▁▁▁█▅▁▄▇▁▁▁▁▆█▄▁▁▄▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▄ ▄
+  32.6 ms      Histogram: log(frequency) by time      61.2 ms < Memory estimate: 16.03 MiB, allocs estimate: 4.</code></pre> 
 <div class="message  is-info">
 <div class="message-header">
 <p> Information</p>
@@ -329,18 +329,18 @@ end</code></pre>
 <p>We can check as before that code gives a fair result, then compare its runtime qualities with the reference implementation.</p>
 <pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  16.301 μs …  13.721 ms  ┊ GC (min … max): 0.00% … 62.47%
- Time  (median):     19.700 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   25.441 μs ± 229.921 μs  ┊ GC (mean ± σ):  9.85% ±  1.09%        ▁▆▅█▄▂▂                                                 
-  ▂▂▃▃▆▇███████▆▅▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▃▃▃▃▃▂▂▂▂▂ ▃
-  16.3 μs         Histogram: frequency by time         36.7 μs < Memory estimate: 34.19 KiB, allocs estimate: 34.</code></pre>
+ Range (min … max):  16.999 μs … 83.698 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     19.099 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   19.226 μs ±  1.425 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%                 ▂ ▃▅▆█ ███▇ ▆▅▄▃▃ ▁                           
+  ▂▂▂▂▂▁▂▂▃▃▁▄▅▇██▁████▁████▁█████▁█▇█▇▁▇▅▅▅▁▄▄▃▃▃▁▃▃▃▂▁▂▂▂▂▂ ▄
+  17 μs           Histogram: frequency by time        21.8 μs < Memory estimate: 34.19 KiB, allocs estimate: 34.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 1727 samples with 1 evaluation.
- Range (min … max):  2.473 ms … 21.689 ms  ┊ GC (min … max): 0.00% … 85.39%
- Time  (median):     2.721 ms              ┊ GC (median):    0.00%
- Time  (mean ± σ):   2.889 ms ±  1.737 ms  ┊ GC (mean ± σ):  5.56% ±  8.02%                         ▂▅█▇▄▃▁                              
-  ▁▁▁▁▁▁▁▁▂▁▂▁▂▂▂▂▂▃▂▃▄▄▆████████▆▅▄▃▂▂▁▂▁▁▁▂▁▂▂▂▂▂▂▂▁▂▁▁▁▁▁ ▂
-  2.47 ms        Histogram: frequency by time        3.01 ms < Memory estimate: 1.09 MiB, allocs estimate: 14322.</code></pre>
+<pre><code class="plaintext code-output">BenchmarkTools.Trial: 1635 samples with 1 evaluation.
+ Range (min … max):  2.793 ms … 20.337 ms  ┊ GC (min … max): 0.00% … 84.78%
+ Time  (median):     2.911 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   3.052 ms ±  1.595 ms  ┊ GC (mean ± σ):  4.80% ±  7.81%                 ▂▃█▅▃▁                                       
+  ▂▄▄▆▆█▆▅▄▄▄▄▄▅▇██████▆▄▄▃▃▂▂▂▂▂▂▂▁▂▂▂▂▃▂▂▃▂▃▂▂▂▂▂▁▂▁▂▁▁▁▁▂ ▃
+  2.79 ms        Histogram: frequency by time         3.2 ms < Memory estimate: 1.09 MiB, allocs estimate: 14322.</code></pre>
 <p>We can see that we have improved the execution time &#40;by a factor of 8&#41; and the memory footprint of the algorithm &#40;by a factor of 13&#41;, without getting closer to the reference implementation.</p>
 <h2 id="analysis_of_the_first_implementation">Analysis of the first implementation</h2>
 <p>Let&#39;s go back to the previous code: </p>
@@ -443,18 +443,18 @@ end</code></pre><div class="message  is-info">
 </div><p>We can again measure the performance of this implementation. To keep the comparison fair, the <code>fft&#33;</code> function should be used instead of <code>fft</code>, as it works in place.</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; |&gt; complex&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  14.600 μs … 109.002 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     17.200 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   17.433 μs ±   2.252 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%            ▂█▂                                                 
-  ▂▂▂▂▃▃▄▆▆██████▅▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▂▂▁▁▁▁▁▁▁▁▁▂▁▁▂▁▂▂▂▂▂▂▂▂▂▂ ▃
-  14.6 μs         Histogram: frequency by time         28.2 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
+ Range (min … max):  16.699 μs … 85.898 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     18.100 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   18.219 μs ±  1.638 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%                  ▂ ▄ ▆▇ █ █▇ ▅ ▄ ▁▁                           
+  ▂▂▁▃▁▅▆▁▆▁▆▆▁▇▁▇█▁█▁██▁█▁██▁█▁█▁██▁▇▁▆▅▁▄▁▄▃▁▃▁▂▃▁▂▁▂▂▁▂▁▂▂ ▄
+  16.7 μs         Histogram: frequency by time        20.2 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_2&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  36.000 μs … 99.901 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     39.700 μs              ┊ GC (median):    0.00%
- Time  (mean ± σ):   39.763 μs ±  2.674 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%  ▂▃     ▅▄ ▂█▂                                               ▁
-  ██▄▃▁▁▇██▆███▇▄▃▁▆▆▄▅▄▃▃▃▁▃▁▁▁▅▅▅▅▆▇▆▆▅▆▅▇▇▇▆▅▄▃▅▅▃▃▅▅▄▅▅▅▇ █
-  36 μs        Histogram: log(frequency) by time      54.7 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+ Range (min … max):  40.698 μs … 58.898 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     41.498 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   41.597 μs ±  1.037 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%      █▁▅                                                      
+  ▂▃█▇███▆▅▅▃▃▂▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▂▁▁▂▁▂▁▂ ▃
+  40.7 μs         Histogram: frequency by time        49.2 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>We have significantly improved our execution time and memory footprint. We can see that there are zero bytes allocated &#40;this means that the compiler does not need to store the few intermediate variables in RAM&#41;, and that the execution time is close to that of the reference implementation.</p>
 <h2 id="the_special_case_of_a_real_signal">The special case of a real signal</h2>
 <p>So far we have reasoned about complex signals, which use two floats for storage. However in many situations we work with real value signals. Now in the case of a real signal, we know that \(\hat{f}\) verifies \(\hat{f}(-) = \hat{f}(\nu)}\). This means that half of the values we calculate are redundant. Although we calculate the Fourier transform of a real signal, the result can be a complex number. In order to save storage space, we can think of using this half of the array to store complex numbers. For this, two properties will help us.</p>
@@ -636,18 +636,18 @@ end</code></pre>
 <p>We can now check the performance of the new implementation:</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  15.000 μs …  16.715 ms  ┊ GC (min … max): 0.00% … 54.79%
- Time  (median):     17.100 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   20.676 μs ± 235.605 μs  ┊ GC (mean ± σ):  8.94% ±  0.78%         ▇▆▆█                                                   
-  ▂▃▃▅▄▅▇█████▇▄▄▃▃▃▂▂▂▂▂▂▂▂▂▁▂▁▁▁▂▂▁▁▁▁▂▁▁▁▂▁▁▁▁▂▁▂▂▂▂▂▂▂▂▂▂▂ ▃
-  15 μs           Histogram: frequency by time         28.7 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
+ Range (min … max):  16.799 μs …  13.767 ms  ┊ GC (min … max): 0.00% … 55.72%
+ Time  (median):     18.100 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   19.612 μs ± 137.492 μs  ┊ GC (mean ± σ):  3.91% ±  0.56%                 ▁ ▄ ▆ █ █ ▇ ▇ ▅▄ ▂ ▁                           
+  ▂▂▁▂▁▂▁▃▁▃▁▅▁▇▁█▁█▁█▁█▁█▁█▁█▁██▁█▁█▁▇▁▆▁▅▁▄▁▃▁▃▁▃▁▃▁▂▁▂▁▂▁▂▂ ▄
+  16.8 μs         Histogram: frequency by time         19.9 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_3&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  19.801 μs … 53.901 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     22.000 μs              ┊ GC (median):    0.00%
- Time  (mean ± σ):   21.860 μs ±  2.018 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%            █                                                  
-  ▂▆▄▂▂▁▄▇▂▄█▅▂▂▂▁▂▂▂▁▂▂▂▂▁▁▂▁▁▁▁▁▁▂▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂▁▂▂▂▂▂▂▂▂▂ ▂
-  19.8 μs         Histogram: frequency by time        32.5 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+ Range (min … max):  23.299 μs …  66.499 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     23.600 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   23.685 μs ± 811.683 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%                        █      ▁                                
+  ▂▁▁▁▁▁▁▅▁▁▁▁▁▁▇▆▁▁▁▁▁▁█▁▁▁▁▁▁█▇▁▁▁▁▁▁▇▁▁▁▁▁▁▃▃▁▁▁▁▁▁▂▁▁▁▁▁▁▂ ▂
+  23.3 μs         Histogram: frequency by time         24.1 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>This is a very good result&#33;</p>
 <h2 id="optimization_of_trigonometric_functions">Optimization of trigonometric functions</h2>
 <p>If we analyze the execution of <code>my_fft_3</code> using Julia&#39;s <em>profiler</em>, we can see that most of the time is spent computing trigonometric functions and creating the <code>StepRange</code> objects used in <code>for</code> loops. The second problem can be easily circumvented by using <code>while</code> loops. For the first one, in <em>Numerical Recipes</em> we can read &#40;section 5.4 &quot;<em>Recurrence Relations and Clenshaw&#39;s Recurrence Formula</em>&quot;, page 219 of the third edition&#41;:</p>
@@ -753,18 +753,18 @@ real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b
 <p>In terms of performance, we finally managed to outperform the reference implementation&#33;</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  15.100 μs …  17.446 ms  ┊ GC (min … max): 0.00% … 55.04%
- Time  (median):     17.200 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   20.968 μs ± 244.052 μs  ┊ GC (mean ± σ):  9.01% ±  0.77%        ▅▅▅█ ▁                                                  
-  ▃▃▄▃▅▆██████▅▅▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▂▁▁▁▁▂▁▁▁▁▁▁▁▁▂▁▂▂▂▂▂▂▂▂▂▂▂▂▂ ▃
-  15.1 μs         Histogram: frequency by time         29.7 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
+ Range (min … max):  16.899 μs …  13.869 ms  ┊ GC (min … max): 0.00% … 55.61%
+ Time  (median):     18.300 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   21.180 μs ± 194.447 μs  ┊ GC (mean ± σ):  7.27% ±  0.79%                    ▃  ▇ █ █ ▆ ▆▄ ▂ ▁                           
+  ▂▂▁▂▁▂▁▃▁▃▃▁▅▁▆▁█▁██▇█▁█▁█▁█▁██▁█▁█▁▇▁▆▄▃▄▁▄▁▃▁▃▁▃▂▁▂▁▂▁▂▁▂▂ ▃
+  16.9 μs         Histogram: frequency by time         20.2 μs < Memory estimate: 1.86 KiB, allocs estimate: 30.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_4&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
 <pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):   9.300 μs … 26.700 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     10.300 μs              ┊ GC (median):    0.00%
- Time  (mean ± σ):   10.320 μs ±  1.125 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%     ▂   ▁               ▃   ▆   ▁   ▅   █   ▄                ▁
-  ▄▁▁█▁▁▁█▁▁▁▃▁▁▁▁▁▁▁▁▁▁▁█▁▁▁█▁▁▁█▁▁▁█▁▁▁█▁▁▁█▁▁▁▆▁▁▁▆▁▁▁▆▁▁▄ █
-  9.3 μs       Histogram: log(frequency) by time      10.8 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+ Range (min … max):  12.699 μs …  25.599 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     12.900 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   12.940 μs ± 511.189 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%                               ▃█                               
+  ▂▁▁▁▁▁▁▁▁▁▁▁▁▁▄▅▁▁▁▁▁▁▁▁▁▁▁▁▁██▁▁▁▁▁▁▁▁▁▁▁▁▁▅▇▁▁▁▁▁▁▁▁▁▁▁▁▁▂ ▂
+  12.7 μs         Histogram: frequency by time         13.1 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p><table class="fndef" id="fndef:power2">
     <tr>
         <td class="fndef-backref">[4]</td>
