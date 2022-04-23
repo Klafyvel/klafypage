@@ -1154,6 +1154,7 @@ for a in x], 1, :), map(x->median.(x), benchmarks))...);
 ```julia:./benchmark_plot.jl
 #hideall
 fig = Figure(resolution=(900,800))
+
 theme_benchmark = Theme(
   Axis=(
     xgridvisible=true,

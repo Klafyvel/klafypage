@@ -16,6 +16,11 @@ include("blogposts.jl")
 
 highlighted_blogposts = filter(x->hasproperty(x,:highlight)&&x.highlight, blogposts)
 
+include("academics.jl")
+
+highlighted_academics = filter(x->hasproperty(x,:highlight)&&x.highlight,
+academics)
+
 +++
 
 ~~~
@@ -62,6 +67,7 @@ I have a degree in engineering from [CentraleSupélec](https://www.centralesupel
 You can find [here](/assets/cv.pdf) a slightly outdated CV.
 
 On this page you can find :
+- My [academics publications](#academics),
 - Some highlighted [contents](#contents) that I published on the Internet,
 - Some of my [projects](#projects) that I am proud to share,
 - Some [blog posts](#blogposts),
@@ -78,11 +84,13 @@ On this page you can find :
 ~~~
 ~~~
 
-{{ cardsection "Contents available on the internet" "I update thoses from time to time. Some are in english others are in french. A more complete list is available in <a href='/contents'>the Contents section</a>." "contents" highlighted_contents }}
+{{ cardsection "Academic publications" "I am a physicist exploring condensed matter property through various spectroscopy methods. Check <a href='/academics'>the Academics section</a>." "academics" highlighted_academics }}
 
-{{ cardsection "Some interesting projects of mine" "You might be interested in my <a href='https://github.com/Klafyvel/' class='link'>Github account</a>. A more complete list is also available in <a href='/projects'>the Projects section</a>." "projects" highlighted_projects right}}
+{{ cardsection "Contents available on the internet" "I update thoses from time to time. Some are in english others are in french. A more complete list is available in <a href='/contents'>the Contents section</a>." "contents" highlighted_contents right }}
 
-{{ cardsection "Highlighted blog posts" "A more complete list is also available in <a href='/blog'>the Blog section</a>." "blogposts" highlighted_blogposts}}
+{{ cardsection "Some interesting projects of mine" "You might be interested in my <a href='https://github.com/Klafyvel/' class='link'>Github account</a>. A more complete list is also available in <a href='/projects'>the Projects section</a>." "projects" highlighted_projects}}
+
+{{ cardsection "Highlighted blog posts" "A more complete list is also available in <a href='/blog'>the Blog section</a>." "blogposts" highlighted_blogposts right}}
 
 ~~~
 <section class="hero is-fullheight" id="contact">
