@@ -64,7 +64,7 @@ I am a PhD student working on hybrid halide perovskites' photophysics. I enjoy m
 
 I have a degree in engineering from [CentraleSupélec](https://www.centralesupelec.fr/en) (Diplôme d'ingénieur de l'École Supérieure d'Électricité) and a master of science in optics and photonics from [Imperial College London](http://www.imperial.ac.uk/), that I both obtained in 2020. I am currently studying for my PhD in Université Paris-Saclay.
 
-You can find [here](/assets/cv.pdf) a slightly outdated CV.
+You can find [here](/assets/cv.pdf) an up-to-date CV (august 2022).
 
 On this page you can find :
 - My [academics publications](#academics),
