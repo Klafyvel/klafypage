@@ -1,5 +1,16 @@
 blogposts = [
     (
+        href="/blog/articles/freecad-honeycomb/",
+        image="/assets/blog/articles/freecad-honeycomb/image-26.jpg",
+        title="Modeling a honeycomb grid in FreeCAD",
+        subtitle="A small tutorial on FreeCAD",
+        intro="""Someone asked me how to make a honeycomb grid in @FreeCADNews. Here's how I do it, and bonus it's parametric! ⬇️""",
+        date=Date("04-08-2022", dateformat"d-m-y"),
+        site="this website !",
+        tags=["English", "FreeCAD", "honeycomb", "twitter"],
+        highlight=true,
+    ), 
+    (
         href="/blog/articles/fft-julia/",
         image="/assets/blog/articles/fft-julia/logo.png",
         title="Let's play at implementing a fast Fourier transform!",
