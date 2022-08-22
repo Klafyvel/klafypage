@@ -3,12 +3,12 @@
       </div>
     </div>
   </section>
-  <!-- <section> -->
-  <!--   <div class="container is-max-desktop"> -->
-  <!--     <h1 class="title">Comments</h1> -->
-  <!--     <div id="remark42"></div> -->
-  <!--   </div> -->
-  <!-- </section> -->
+  <section>
+    <div class="container is-max-desktop">
+      <h1 class="title">Comments</h1>
+      <div id="remark42"></div>
+    </div>
+  </section>
   {{ end }}
   {{ isnotpage blog/articles/* }}
   </div>
@@ -19,13 +19,13 @@
   {{ if hascode }}
       {{ insert foot_highlight.html }}
   {{ end }}
-  <!-- <script> -->
-  <!--   remark_config = { -->
-  <!--     host: 'https://remark42.klafyvel.me', -->
-  <!--     site_id: 'klafyvel.me', -->
-  <!--     components: ['embed'] -->
-  <!--   } -->
-  <!-- </script> -->
+  <script>
+    remark_config = {
+      host: 'https://remark42.klafyvel.me',
+      site_id: 'klafyvel.me',
+      components: ['embed']
+    }
+  </script>
   <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)}}(remark_config.components||["embed"],document);</script>
   <script src="/libs/burger.js"></script> 
   <footer class="footer">
