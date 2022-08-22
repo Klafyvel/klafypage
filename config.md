@@ -21,7 +21,7 @@ ignore = ["node_modules/"]
 generate_rss = true
 website_title = "Klafyvel"
 website_descr = "Hugo Levy-Falk's web-page"
-website_url   = "klafyvel.me"
+website_url   = "https://klafyvel.me"
 rss_full_content = true
 +++
 
