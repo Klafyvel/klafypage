@@ -9,8 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
+        fetch-depth: 0
         persist-credentials: false
     # NOTE: Python is necessary for the pre-rendering (minification) step
     - name: Install python
@@ -25,7 +26,7 @@ jobs:
       with:
         version: 1.8
     - name: Checkout __site from the gh-pages branch to avoid doing the work twice.
-      run: git fetch origin gh-pages && git worktree add __site/ gh-pages
+      run: git worktree add __site/ gh-pages
     # NOTE
     #   The steps below ensure that NodeJS and Franklin are loaded then it
     #   installs highlight.js which is needed for the prerendering step
