@@ -51,6 +51,9 @@ real Gaussian is also a real Gaussian[^gaussian], which simplifies the graphical
 
 ```julia:./code/import.jl
 #hideall
+using Pkg
+Pkg.activate(temp=true)
+Pkg.add(["FFTW", "CairoMakie", "BenchmarkTools"])
 using FFTW, CairoMakie, BenchmarkTools
 ```
 
