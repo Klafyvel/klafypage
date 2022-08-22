@@ -25,7 +25,7 @@ jobs:
       with:
         version: 1.8
     - name: Checkout __site from the gh-pages branch to avoid doing the work twice.
-      run: git worktree add __site/ origin/gh-pages
+      run: git worktree add __site/ gh-pages
     # NOTE
     #   The steps below ensure that NodeJS and Franklin are loaded then it
     #   installs highlight.js which is needed for the prerendering step
