@@ -1,4 +1,4 @@
-Sitemap: klafyvel.me/sitemap.xml
+Sitemap: https://klafyvel.me/sitemap.xml
 
 User-agent: *
 Disallow:
