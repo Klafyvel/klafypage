@@ -11,7 +11,7 @@ This tutorial is intended for people who have already had the opportunity to enc
 \information{This content was originally publisher on
 [zestedesavoir.com](https://zestedesavoir.com) in French. This is a quick
 translation (using Deepl and a few manual modifications). If something seems
-off please tell me, as it is likely an error coming from the translation step.}
+off please tell me, as it is likely an error coming from the translation step. You can even [open an issue](https://github.com/Klafyvel/klafypage/issues/new/choose) on Github, or [create a pull-request](https://github.com/Klafyvel/klafypage/compare) to fix the issue !}
 
 [^numerical]: William H. Press, Saul A. Teukolsky, William T. Vetterling, & Brian P. Flannery. (2007). Numerical Recipes 3rd Edition: The Art of Scientific Computing (3rd ed.). Cambridge University Press.
 
@@ -1206,7 +1206,7 @@ markers=[:circle, :utriangle, :dtriangle, :ltriangle, :star4, :rect, :diamond, :
 labels = ["Naive DFT", "FFTW.fft", "FFTW.fft!", "FFTW.rfft", "my_fft", "my_fft_2", "my_fft_3", "my_fft_4"]
 
 for i in 1:length(labels)
-  scatterlines!(ax_time, benchmark_lengths, median_times[:,i],
+  scatterlines!(ax_time, benchmark_lengths, max.(median_times[:,i], 1e-20),
   marker=markers[i], color=colors[i])
   scatterlines!(ax_memory, benchmark_lengths, max.(median_memory[:,i], 1/2),
   marker=markers[i], color=colors[i])
@@ -1224,6 +1224,7 @@ ax_alloc.yscale[] = log2
 
 
 Legend(fig[:,2], ax_alloc, tellwidth=true, tellheight=false)
+set_theme!()
 
 save(joinpath(@OUTPUT, "benchmark.svg"), current_figure())
 ```
@@ -1297,3 +1298,8 @@ Another improvement that could be made concerns the calculation of the inverse F
 Finally, I want to thank @Gawaboumga, @Næ, @zeqL and @luxera for their feedback
 on the beta of this tutorial, and @Gabbro for the validation on
 [zestedesavoir.com](https://zestedesavoir.com)!
+
+```julia:./code/goodbye.jl
+#hideall
+Pkg.activate(".")
+```
