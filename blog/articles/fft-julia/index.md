@@ -3,7 +3,7 @@
 @def mintoclevel=1
 @def rss_description = "An implementation of the FFT using Julia!"
 @def rss_pubdate = Date(2022, 02, 12)
-@def reeval = true
+@def reeval = false
 
 The Fourier transform is an essential tool in many fields, be it in Physics, Signal Processing, or Mathematics. The method that is probably the most known to calculate it numerically is called the **FFT** for *Fast Fourier Transform*. In this little tutorial, I propose to try to understand and implement this algorithm in an efficient way. I will use the language [Julia](https://julialang.org/), but it should be possible to follow using other languages such as Python or C. We will compare the results obtained with those given by [the Julia port of the FFTW library](https://github.com/JuliaMath/FFTW.jl).
 
@@ -729,7 +729,9 @@ We have significantly improved our execution time and memory footprint. We can s
 ## The special case of a real signal
 
  
-So far we have reasoned about complex signals, which use two floats for storage. However in many situations we work with real value signals. Now in the case of a real signal, we know that $\hat{f}$ verifies $\hat{f}(-) = \hat{f}(\nu)}$. This means that half of the values we calculate are redundant. Although we calculate the Fourier transform of a real signal, the result can be a complex number. In order to save storage space, we can think of using this half of the array to store complex numbers. For this, two properties will help us.
+So far we have reasoned about complex signals, which use two floats for storage.
+However in many situations we work with real value signals. Now in the case of a
+real signal, we know that $\hat{f}$ verifies $\hat{f}(-\nu) = \overline{\hat{f}(\nu)}$. This means that half of the values we calculate are redundant. Although we calculate the Fourier transform of a real signal, the result can be a complex number. In order to save storage space, we can think of using this half of the array to store complex numbers. For this, two properties will help us.
 
 ### Property 1: Compute the Fourier transform of two real functions at the same time
 If we have two real signals $f$ and $g$, we can define the complex signal $h=f+ig$. We then have:
@@ -970,7 +972,7 @@ If we analyze the execution of `my_fft_3` using Julia's *profiler*, we can see t
 > $$\begin{aligned}\cos(\theta + \delta) &= \cos\theta - [\alpha \cos\theta + \beta\sin\theta]\\\sin(\theta + \delta) &= \sin\theta - [\alpha\sin\theta - \beta\cos\theta]\end{aligned}$$
 >
 > Where $\alpha$ and $\beta$ are the precomputed coefficients
-> $\alpha = 2\sin^2\left(\frac{\delta}{2}\right),\;\beta=sin\delta$
+> $\alpha = 2\sin^2\left(\frac{\delta}{2}\right),\;\beta=\sin\delta$
 
 \secret{
 This can be shown using the classical trigonometric identities:
