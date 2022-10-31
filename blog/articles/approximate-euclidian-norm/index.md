@@ -10,6 +10,7 @@ While wandering on the internet, I stumbled uppon [Paul Hsieh's blog-post](http:
 # Table of contents
 
 \toc
+
 ----
 
 # Setting-up the scene.
@@ -460,4 +461,6 @@ $$
 You'll get at most a 5.3% error. This is a bit different from what's proposed on [Paul Hsieh's blog-post](http://www.azillionmonkeys.com/qed/sqroot.html#distance). Unless I made a mistake, there might be a typo on his blog!
 
 If you are interested in playing with the code used to generate the figures in this article, have a look at the [compagnon notebook](/assets/blog/articles/approximate-euclidian-norm/notebook.jl)!
+
+As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on [Twitter](httms://twitter.com/klafyvel) or [Mastodon](https://mastodon.social/@klafyvel).
 
