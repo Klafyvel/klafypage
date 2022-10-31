@@ -1,7 +1,7 @@
-@def title="A nice approximate of the norm of a 2D vector."
+@def title="A nice approximation of the norm of a 2D vector."
 @def subtitle=""
 @def mintoclevel=1
-@def rss_description = "A nice approximate of the norm of a 2D vector."
+@def rss_description = "A nice approximation of the norm of a 2D vector."
 @def rss_pubdate = Date(2022, 10, 30)
 
 While wandering on the internet, I stumbled uppon [Paul Hsieh's blog-post](http://www.azillionmonkeys.com/qed/sqroot.html#distance),  where he demonstrates a way to approximate the norm  of a vector without any call to the sqrt function. Let's see if I can reproduce the steps to derive this.
@@ -226,7 +226,7 @@ end
 ```
 \figure{The upper and lower bounds of the norm outlined.}{./code/output/illustration5.svg}
 
-# Choosing the best approximate for the norm.
+# Choosing the best approximation for the norm.
 Now, we could stick to Paul Hsieh's choice of taking the middle between the lower and the upper bounds, and it will probably be fine. But come on, let's see if it is the *best* choice. 😉
 
 Formally, the problem is to find a number $a\in[0,1]$ such as $g$ defined as follow is the closest possible to the norm-2.
@@ -269,7 +269,7 @@ let
 end
 
 ```
-\figure{Various possible approximates for the norm.}{./code/output/illustration6.svg}
+\figure{Various possible approximations for the norm.}{./code/output/illustration6.svg}
 
 As expected, we can continuously vary our approximation between the upper and lower bounds. Notice that these functions are periodic and even. We can thus focus on the first half period to minimize the error. The first half period is when the vector is at the first octagon vertice, starting from the $x$ acis and circling anti-clockwise.
 

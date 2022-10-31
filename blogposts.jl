@@ -2,7 +2,7 @@ blogposts = [
     (
         href="/blog/articles/approximate-euclidian-norm/",
         image="/assets/blog/articles/approximate-euclidian-norm/logo.png",
-        title="A nice approximate of the norm of a 2D vector.",
+        title="A nice approximation of the norm of a 2D vector.",
         subtitle="Some cool sunday project!",
         intro="""
 While wandering on the internet, I stumbled uppon Paul Hsieh's blog-post, where he demonstrates a way to approximate the norm  of a vector without any call to the sqrt function. Let's see if I can reproduce the steps to derive this.
