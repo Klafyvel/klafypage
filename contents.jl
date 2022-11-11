@@ -16,7 +16,7 @@ contents = [
              tags=["English", "Sway", "Wayland", "Wireguard"],
             ),
             (
-             href="https://zestedesavoir.com/contenus/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/",
+             href="https://zestedesavoir.com/billets/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/",
              image="https://zestedesavoir.com/media/galleries/18437/ffed6cd7-df47-4ca5-867a-0d893209aad8.png.60x60_q95_crop.jpg",
              title="En période de canicule, une idée fixe: économiser la float",
              subtitle="",
@@ -39,7 +39,7 @@ contents = [
              highlight=true,
             ), 
             (
-             href="https://zestedesavoir.com/contenus/4228/utiliser-son-ipad-pro-comme-deuxieme-ecran-avec-sway/",
+             href="https://zestedesavoir.com/billets/4228/utiliser-son-ipad-pro-comme-deuxieme-ecran-avec-sway/",
              image="/assets/bouletmaton.jpg",
              title="Utiliser son IPad Pro comme deuxième écran avec Sway",
              subtitle="Via une connection VNC sur le réseau local.",
