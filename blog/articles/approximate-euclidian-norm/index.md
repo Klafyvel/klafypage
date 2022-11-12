@@ -4,7 +4,7 @@
 @def rss_description = "A nice approximation of the norm of a 2D vector."
 @def rss_pubdate = Date(2022, 10, 30)
 
-While wandering on the internet, I stumbled uppon [Paul Hsieh's blog-post](http://www.azillionmonkeys.com/qed/sqroot.html#distance),  where he demonstrates a way to approximate the norm  of a vector without any call to the sqrt function. Let's see if I can reproduce the steps to derive this.
+While wandering on the internet, I stumbled upon [Paul Hsieh's blog-post](http://www.azillionmonkeys.com/qed/sqroot.html#distance), where he demonstrates a way to approximate the norm of a vector without any call to the `sqrt` function. Let's see if I can reproduce the steps to derive this.
 
 ----
 # Table of contents
@@ -53,11 +53,11 @@ let
 end
 ```
 
-\figure{The (x,y) pairs with an euclidian norm of 1.}{./code/output/illustration1.svg}
+\figure{The (x, y) pairs with a euclidean norm of 1.}{./code/output/illustration1.svg}
 
 # Finding a lower bound to the norm.
 
-Now, the issue with the norm is that the $\sqrt{}$ operation is expensive to compute. That's why we would like anohter way to approximate the norm. A first idea is to look at other norms available, indeed, what we have called "norm" so far is actually the 2-norm, also named *euclidian norm*. Let's have a look at two other norms : the infinity norm and the manhattan norm.
+Now, the issue with the norm is that the $\sqrt{}$ operation is expensive to compute. That's why we would like another way to approximate the norm. A first idea is to look at other norms available, indeed, what we have called "norm" so far is actually the 2-norm, also named *euclidean norm*. Let's have a look at two other norms : the infinity norm and the Manhattan norm.
 
 Infinity norm is :
 $$
@@ -97,7 +97,7 @@ let
 end
 ```
 
-\figure{The (x,y) pairs with an euclidian norm of 1, an infinity norm of 1 or a manhattan norm of 1.}{./code/output/illustration2.svg}
+\figure{The (x, y) pairs with a euclidean norm of 1, an infinity norm of 1 or a Manhattan norm of 1.}{./code/output/illustration2.svg}
 
 Now we see the Manhattan norm is indeed a lower bound for the 2-norm, even if it's rough. The Infinity norm, however, is too high. But that is not an issue, we could simply scale it up so that it is always higher than the 2-norm. The scaling factor is chosen, such as the yellow curve tangent to the circle. For that, we need it to be equal to $\cos\frac{\pi}{4}=\frac{1}{\sqrt{2}}$.
 
@@ -129,7 +129,7 @@ let
 end
 ```
 
-\figure{We now have a nice lower bound of the euclidian norm!}{./code/output/illustration3.svg}
+\figure{We now have a nice lower bound of the euclidean norm!}{./code/output/illustration3.svg}
 
 We have a lower bound! By choosing the closest to the circle between the yellow and green curves, we get an octagon that is very close to the circle. We can define the upper bound of the circle with a function $f$ such as:
 
@@ -187,7 +187,7 @@ $$
 \end{align}
 $$
 
-Thus the upper-bound for the 2-norm with the octagon method is $\sqrt{4 - 2\sqrt{2}}f(x,y)$:
+Thus, the upper-bound for the 2-norm with the octagon method is $\sqrt{4 - 2\sqrt{2}}f(x,y)$:
 
 $$
 f(x,y) \leq \sqrt{x^2+y^2} \leq \sqrt{4 - 2\sqrt{2}}f(x,y)
@@ -229,7 +229,7 @@ end
 # Choosing the best approximation for the norm.
 Now, we could stick to Paul Hsieh's choice of taking the middle between the lower and the upper bounds, and it will probably be fine. But come on, let's see if it is the *best* choice. 😉
 
-Formally, the problem is to find a number $a\in[0,1]$ such as $g$ defined as follow is the closest possible to the norm-2.
+Formally, the problem is to find a number $a\in[0,1]$ such as $g$ defined as follows is the closest possible to the norm-2.
 
 $$
 \begin{align}
@@ -271,7 +271,7 @@ end
 ```
 \figure{Various possible approximations for the norm.}{./code/output/illustration6.svg}
 
-As expected, we can continuously vary our approximation between the upper and lower bounds. Notice that these functions are periodic and even. We can thus focus on the first half period to minimize the error. The first half period is when the vector is at the first octagon vertice, starting from the $x$ acis and circling anti-clockwise.
+As expected, we can continuously vary our approximation between the upper and lower bounds. Notice that these functions are periodic and even. We can thus focus on the first half period to minimize the error. The first half period is when the vector is at the first octagon vertices, starting from the $x$ axis and circling anti-clockwise.
 
 ```julia:./code/illustration7.jl
 #hideall
@@ -321,7 +321,7 @@ e(a) &=& \int_0^{\arctan\left(\sqrt{2}-1\right)}(g(x,y,a)-1)^2\text{d}\theta
 \end{align}
 $$
 
-Thankfully, the expression of $f(x,y)$ and thus of $g(x,y,a)$ should simplify a lot on the given interval. You can see on schematic above that on this interval we have, $f(x,y)=max(|x|,|y|)=|x|=x=\cos\theta$. We can thus rewrite $e(a)$ as follow.
+Thankfully, the expression of $f(x,y)$ and thus of $g(x,y,a)$ should simplify a lot on the given interval. You can see on schematic above that on this interval we have, $f(x,y)=max(|x|,|y|)=|x|=x=\cos\theta$. We can thus rewrite $e(a)$ as follows.
 
 $$
 \begin{align}
@@ -379,7 +379,7 @@ end
 
 As we can see from these plots, there is a minimal error, and though 0.5 is a reasonable choice for $a$, we can do slightly better around 0.3.
 
-We can explicitely calculate $e(a)$. Let $h(a)=(1+a(A-1))$. We have
+We can explicitly calculate $e(a)$. Let $h(a)=(1+a(A-1))$. We have
 
 $$
 \begin{align}
@@ -389,7 +389,7 @@ e(a) &=& \int_0^{\pi/8}(h(a)\cos\theta-1)^2\text{d}\theta\\
 \end{align}
 
 $$
-Where $B=\frac{\pi}{16}+\frac{1}{4\sqrt2}$. Thus we look for the position of the minimum, that is where $e'(a)=0$.
+Where $B=\frac{\pi}{16}+\frac{1}{4\sqrt2}$. Thus, we look for the position of the minimum, that is where $e'(a)=0$.
 
 $$
 \begin{align}
@@ -446,10 +446,10 @@ let
 end
 
 ```
-\figure{Our best approximation for the euclidian norm, with the calculated maximum errors.}{./code/output/illustration10.svg}
+\figure{Our best approximation for the euclidean norm, with the calculated maximum errors.}{./code/output/illustration10.svg}
 
 # Conclusion
-That was a fun sunday project! Originally this was intended to be included in a longer blog-post that is yet to be finished, but I figured it was interesting enough to have its own post. The take-home message being, you can approximate the Euclidian norm of a vector with:
+That was a fun Sunday project! Originally this was intended to be included in a longer blog-post that is yet to be finished, but I figured it was interesting enough to have its own post. The take-home message being, you can approximate the Euclidean norm of a vector with:
 
 $$
 \begin{align}
@@ -460,7 +460,7 @@ $$
 
 You'll get at most a 5.3% error. This is a bit different from what's proposed on [Paul Hsieh's blog-post](http://www.azillionmonkeys.com/qed/sqroot.html#distance). Unless I made a mistake, there might be a typo on his blog!
 
-If you are interested in playing with the code used to generate the figures in this article, have a look at the [compagnon notebook](/assets/blog/articles/approximate-euclidian-norm/notebook.jl)!
+If you are interested in playing with the code used to generate the figures in this article, have a look at the [companion notebook](/assets/blog/articles/approximate-euclidian-norm/notebook.jl)!
 
 As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on [Twitter](httms://twitter.com/klafyvel) or [Mastodon](https://mastodon.social/@klafyvel).
 
