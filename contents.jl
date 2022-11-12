@@ -7,6 +7,8 @@ contents = [
              intro="Vous êtes-vous déjà demandé pourquoi un éditeur tel que Vim, à l’apparence si austère dans sa configuration par défaut, jouissait d’une popularité importante sur les Internets ? Ou peut-être qu’en assistant à une de ces présentations où quelqu’un utilise Vim et où l’on voit s’afficher chacune des touches appuyées vous avez pensé qu’il fallait être fou pour être capable de mémoriser autant de combinaisons obscures ? Ou encore peut-être êtes-vous tombés complètement par hasard sur cet article et cherchez de quoi occuper vos dix prochaines minutes.",
              date=Date("29-10-2022", dateformat"d-m-y"),
              tags=["French", "vim", "neovim"],
+             site="zestedesavoir.com",
+             ),
             (
              href="https://www.reddit.com/r/swaywm/comments/we946s/a_simple_stupid_script_to_toggle_wireguard_using/",
              image="https://styles.redditmedia.com/t5_39q1c/styles/communityIcon_6wjsixewzz211.png?width=256&s=b5fba30f9a6b7c9cddb4f26ca96576f1b50dfb47",
