@@ -3,7 +3,7 @@
 @def mintoclevel=1
 @def rss_description = "An implementation of the FFT using Julia!"
 @def rss_pubdate = Date(2022, 02, 12)
-@def reeval = false
+@def reeval = true
 
 The Fourier transform is an essential tool in many fields, be it in Physics, Signal Processing, or Mathematics. The method that is probably the most known to calculate it numerically is called the **FFT** for *Fast Fourier Transform*. In this little tutorial, I propose to try to understand and implement this algorithm in an efficient way. I will use the language [Julia](https://julialang.org/), but it should be possible to follow using other languages such as Python or C. We will compare the results obtained with those given by [the Julia port of the FFTW library](https://github.com/JuliaMath/FFTW.jl).
 
@@ -1098,142 +1098,150 @@ If we compare the different implementations proposed in this tutorial as well as
 
 ```julia:./benchmark.jl
 #hideall
-function benchmark_all_methods(l)
-	bench_naive = try
-		 @benchmark naive_dft(a) setup=(a = rand($l))
-	catch e
-		nothing
-	end
-	bench_fft = try
-		 @benchmark fft(a) setup=(a = rand($l))
-	catch e
-		nothing
-	end
-	bench_fft! = try
-		@benchmark fft!(a) setup=(a = rand($l) .|> complex)
-	catch e
-		nothing
-	end
-	bench_my_fft = try
-		@benchmark my_fft(a) setup=(a = rand($l))
-	catch e
-		nothing
-	end
-	bench_my_fft_2 = try
-		@benchmark my_fft_2(a) setup=(a = rand($l) .|> complex)
-	catch e
-		nothing
-	end
-	bench_my_fft_3 = try
-		@benchmark my_fft_3(x) setup=(x = rand($l))
-	catch e
-		nothing
-	end
-	bench_my_fft_4 = try
-		@benchmark my_fft_4(x) setup=(x = rand($l))
-	catch e
-		nothing
-	end
-  bench_rfft = try
-		@benchmark rfft(x) setup=(x = rand($l))
-	catch e
-		nothing
-	end
-	
-	bench_naive, bench_fft, bench_fft!, bench_rfft, bench_my_fft, bench_my_fft_2,
-  bench_my_fft_3, bench_my_fft_4
-end
-
-benchmark_lengths = 2 .^ [2, 4, 8, 9, 10, 16]
-benchmarks = benchmark_all_methods.(benchmark_lengths)
-Base.minimum(::Nothing) = nothing
-import Statistics
-Statistics.median(::Nothing) = nothing
-median_times = vcat(map(x->reshape([if isnothing(a) missing else a.time end for
-a in x], 1, :), map(x->median.(x), benchmarks))...);
-median_memory = vcat(map(x->reshape([if isnothing(a) missing else a.memory end
-for a in x], 1, :), map(x->median.(x), benchmarks))...);
-median_allocs = vcat(map(x->reshape([if isnothing(a) missing else a.allocs end
-for a in x], 1, :), map(x->median.(x), benchmarks))...);
+# function benchmark_all_methods(l)
+# 	bench_naive = try
+# 		 @benchmark naive_dft(a) setup=(a = rand($l))
+# 	catch e
+#     @warn "Failed for naive" l
+# 		nothing
+# 	end
+# 	bench_fft = try
+# 		 @benchmark fft(a) setup=(a = rand($l))
+# 	catch e
+#     @warn "Failed for fft" l
+# 		nothing
+# 	end
+# 	bench_fft! = try
+# 		@benchmark fft!(a) setup=(a = rand($l) .|> complex)
+# 	catch e
+#     @warn "Failed for fft!" l
+# 		nothing
+# 	end
+# 	bench_my_fft = try
+# 		@benchmark my_fft(a) setup=(a = rand($l))
+# 	catch e
+#     @warn "Failed for my_fft" l
+# 		nothing
+# 	end
+# 	bench_my_fft_2 = try
+# 		@benchmark my_fft_2(a) setup=(a = rand($l) .|> complex)
+# 	catch e
+#     @warn "Failed for my_fft_2" l
+# 		nothing
+# 	end
+# 	bench_my_fft_3 = try
+# 		@benchmark my_fft_3(x) setup=(x = rand($l))
+# 	catch e
+#     @warn "Failed for my_fft_3" l
+# 		nothing
+# 	end
+# 	bench_my_fft_4 = try
+# 		@benchmark my_fft_4(x) setup=(x = rand($l))
+# 	catch e
+#     @warn "Failed for my_fft_4" l
+# 		nothing
+# 	end
+#   bench_rfft = try
+# 		@benchmark rfft(x) setup=(x = rand($l))
+# 	catch e
+#     @warn "Failed for rfft" l
+# 		nothing
+# 	end
+# 	
+# 	bench_naive, bench_fft, bench_fft!, bench_rfft, bench_my_fft, bench_my_fft_2,
+#   bench_my_fft_3, bench_my_fft_4
+# end
+# 
+# benchmark_lengths = 2 .^ [2, 4, 8, 9, 10, 16]
+# benchmarks = benchmark_all_methods.(benchmark_lengths)
+# Base.minimum(::Nothing) = nothing
+# import Statistics
+# Statistics.median(::Nothing) = nothing
+# median_times = vcat(map(x->reshape([if isnothing(a) missing else a.time end for
+# a in x], 1, :), map(x->median.(x), benchmarks))...);
+# median_memory = vcat(map(x->reshape([if isnothing(a) missing else a.memory end
+# for a in x], 1, :), map(x->median.(x), benchmarks))...);
+# median_allocs = vcat(map(x->reshape([if isnothing(a) missing else a.allocs end
+# for a in x], 1, :), map(x->median.(x), benchmarks))...);
 ```
 
 ```julia:./benchmark_plot.jl
 #hideall
-fig = Figure(resolution=(900,800))
-
-theme_benchmark = Theme(
-  Axis=(
-    xgridvisible=true,
-    ygridvisible=true,
-    yminorticksvisible=true,
-    xminorticksvisible=true,
-    yminorgridvisible=true,
-    xminorgridvisible=true,
-    yticksvisible=true,
-    yticklabelsvisible=true,
-    ylabelsize=20,
-    xlabelsize=20,
-    xminorticks = IntervalsBetween(5),
-    yminorticks = IntervalsBetween(10),
-    xticklabelssize=18,
-    yticklabelsssize=18,
-  ),
-  ScatterLines=(
-    markersize=24,
-  )
-)
-
-set_theme!(theme_benchmark)
-ax_time = Axis(
-  fig[1,1],
-  xlabel="Input array size",
-  ylabel="Execution time (ns)",
-)
-ax_memory = Axis(
-  fig[2,1],
-  xlabel="Input array size",
-  ylabel="Memory estimate (bytes)",
-  limits=(nothing, nothing, 1/2, nothing),
-)
-ax_alloc = Axis(
-  fig[3,1],
-  xlabel="Input array size",
-  ylabel="Allocs estimate",
-  limits=(nothing, nothing, 1/2, nothing),
-)
-linkxaxes!(ax_time, ax_alloc)
-linkxaxes!(ax_time, ax_memory)
-
-colors=[Makie.wong_colors(); :black]
-markers=[:circle, :utriangle, :dtriangle, :ltriangle, :star4, :rect, :diamond, :star5]
-labels = ["Naive DFT", "FFTW.fft", "FFTW.fft!", "FFTW.rfft", "my_fft", "my_fft_2", "my_fft_3", "my_fft_4"]
-
-for i in 1:length(labels)
-  scatterlines!(ax_time, benchmark_lengths, max.(median_times[:,i], 1e-20),
-  marker=markers[i], color=colors[i])
-  scatterlines!(ax_memory, benchmark_lengths, max.(median_memory[:,i], 1/2),
-  marker=markers[i], color=colors[i])
-  scatterlines!(ax_alloc, benchmark_lengths, max.(median_allocs[:,i], 1/2),
-  marker=markers[i], color=colors[i], label=labels[i])
-end
-
-
-ax_time.xscale[] = log2
-ax_memory.xscale[] = log2
-ax_alloc.xscale[] = log2
-ax_time.yscale[] = log10
-ax_memory.yscale[] = log2
-ax_alloc.yscale[] = log2
-
-
-Legend(fig[:,2], ax_alloc, tellwidth=true, tellheight=false)
-set_theme!()
-
-save(joinpath(@OUTPUT, "benchmark.svg"), current_figure())
+# fig = Figure(resolution=(900,800))
+# 
+# theme_benchmark = Theme(
+#   Axis=(
+#     xgridvisible=true,
+#     ygridvisible=true,
+#     yminorticksvisible=true,
+#     xminorticksvisible=true,
+#     yminorgridvisible=true,
+#     xminorgridvisible=true,
+#     yticksvisible=true,
+#     yticklabelsvisible=true,
+#     ylabelsize=20,
+#     xlabelsize=20,
+#     xminorticks = IntervalsBetween(5),
+#     yminorticks = IntervalsBetween(10),
+#     xticklabelssize=18,
+#     yticklabelsssize=18,
+#   ),
+#   ScatterLines=(
+#     markersize=24,
+#   )
+# )
+# 
+# set_theme!(theme_benchmark)
+# ax_time = Axis(
+#   fig[1,1],
+#   xlabel="Input array size",
+#   ylabel="Execution time (ns)",
+# )
+# ax_memory = Axis(
+#   fig[2,1],
+#   xlabel="Input array size",
+#   ylabel="Memory estimate (bytes)",
+#   limits=(nothing, nothing, 1/2, nothing),
+# )
+# ax_alloc = Axis(
+#   fig[3,1],
+#   xlabel="Input array size",
+#   ylabel="Allocs estimate",
+#   limits=(nothing, nothing, 1/2, nothing),
+# )
+# linkxaxes!(ax_time, ax_alloc)
+# linkxaxes!(ax_time, ax_memory)
+# 
+# colors=[Makie.wong_colors(); :black]
+# markers=[:circle, :utriangle, :dtriangle, :ltriangle, :star4, :rect, :diamond, :star5]
+# labels = ["Naive DFT", "FFTW.fft", "FFTW.fft!", "FFTW.rfft", "my_fft", "my_fft_2", "my_fft_3", "my_fft_4"]
+# 
+# for i in 1:length(labels)
+#   scatterlines!(ax_time, benchmark_lengths, max.(median_times[:,i], 1e-20),
+#   marker=markers[i], color=colors[i])
+#   scatterlines!(ax_memory, benchmark_lengths, max.(median_memory[:,i], 1/2),
+#   marker=markers[i], color=colors[i])
+#   scatterlines!(ax_alloc, benchmark_lengths, max.(median_allocs[:,i], 1/2),
+#   marker=markers[i], color=colors[i], label=labels[i])
+# end
+# 
+# 
+# ax_time.xscale[] = log2
+# ax_memory.xscale[] = log2
+# ax_alloc.xscale[] = log2
+# ax_time.yscale[] = log10
+# ax_memory.yscale[] = log2
+# ax_alloc.yscale[] = log2
+# 
+# 
+# Legend(fig[:,2], ax_alloc, tellwidth=true, tellheight=false)
+# set_theme!()
+# 
+# save(joinpath(@OUTPUT, "benchmark.svg"), current_figure())
 ```
 
 \figure{Benchmark of the different solutions: median
-values.}{./output/benchmark.svg}
+values.}{./benchmark.svg}
 
 I added the function `FFTW.rfft` which is supposed to be optimized for real. We can see that in reality, unless you work on very large arrays, it does not bring much performance.
 
@@ -1245,7 +1253,7 @@ How can we explain these differences, especially between our latest implementati
    example in the sense that it can only work on input arrays whose size is a
    power of two. And even then, only those for which we have taken the trouble
    to implement a method of the `bit_reverse` function. The reverse bit permutation problem is a bit more complicated to solve in the general case. Moreover FFTW performs well on many types of architectures, offers discrete Fourier transforms in multiple dimensions etc... If you are interested in the subject, I recommend [this article](https://www.researchgate.net/publication/2986439_The_Design_and_implementation_of_FFTW3)[^fftw] which presents the internal workings of FFTW.
-2. The representation of the complex numbers plays in our favor. Indeed we avoid our implementation to do any conversion, this is seen in particular in the test codes where we take care of recovering the real part and the imaginary part of the transform:
+2. The representation of the complex numbers plays in our favor. Indeed, we avoid our implementation to do any conversion, this is seen in particular in the test codes where we take care of recovering the real part and the imaginary part of the transform:
 ```julia:./code/code24.jl
 real.(b[1:end÷2]) ≈ c[1:2:end] && imag.(b[1:end÷2]) ≈ c[2:2:end]
 ```

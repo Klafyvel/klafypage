@@ -1,5 +1,28 @@
 blogposts = [
     (
+        href="/blog/articles/fft-arduino/",
+        image="/assets/blog/articles/fft-arduino/logo.jpg",
+        title="How I over-engineered a Fast Fourier Transform for Arduino.",
+        subtitle="The lengthy, excruciating, details.",
+        intro="""
+Everything began with me wanting to implement the Fast Fourier Transform (FFT)
+on my Arduino Uno for a side project. The first thing you do in such case is asked
+your favorite search engine for existing solutions. If you google "arduino FFT" one of the first result will be related to this instructable: ApproxFFT: The
+Fastest FFT Function for Arduino.
+As you can imagine, this could only tickle my interest: there was an existing
+solution to my problem, and the title suggested that it was the fastest
+available! And thus, on April 18ᵗʰ 2021, I started a
+journey that would bring me to write my own tutorial on implementing the FFT in
+Julia,
+learn AVR Assembly and write a blog post about it, about one year and a half
+later.
+""",
+        date=Date("13-11-2022", dateformat"d-m-y"),
+        site="this website !",
+        tags=["English", "julia", "arduino", "FFT"],
+        highlight=true,
+    ), 
+    (
         href="/blog/articles/approximate-euclidian-norm/",
         image="/assets/blog/articles/approximate-euclidian-norm/logo.png",
         title="A nice approximation of the norm of a 2D vector.",
