@@ -3,7 +3,6 @@
 @def mintoclevel=1
 @def rss_description = "An implementation of the FFT using Julia!"
 @def rss_pubdate = Date(2022, 02, 12)
-@def reeval = true
 
 The Fourier transform is an essential tool in many fields, be it in Physics, Signal Processing, or Mathematics. The method that is probably the most known to calculate it numerically is called the **FFT** for *Fast Fourier Transform*. In this little tutorial, I propose to try to understand and implement this algorithm in an efficient way. I will use the language [Julia](https://julialang.org/), but it should be possible to follow using other languages such as Python or C. We will compare the results obtained with those given by [the Julia port of the FFTW library](https://github.com/JuliaMath/FFTW.jl).
 

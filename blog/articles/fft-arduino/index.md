@@ -21,7 +21,7 @@ There is a [companion GitHub repository](https://github.com/Klafyvel/AVR-FFT) wh
 
 \information{This is the long version of the story. If you are only interested
 in nice plots showing the speed and the accuracy of my proposed solution, please
-head to the dedicated instructable : Faster than the Fastest FFT on Arduino !}
+head to the dedicated instructable : [Faster than the Fastest FFT for Arduino](https://www.instructables.com/Faster-Than-the-Fastest-FFT-for-Arduino/) !}
 
 [^date]: Yes, [I went through my Firefox history database](https://support.mozilla.org/en-US/questions/937585#answer-369869) to find this date.
 
