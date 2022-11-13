@@ -2,42 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
-    <loc>https://klafyvel.me/blog/page/index.html</loc>
-    <lastmod>2022-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://klafyvel.me/contents/index.html</loc>
-    <lastmod>2022-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://klafyvel.me/index.html</loc>
-    <lastmod>2022-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://klafyvel.me/404/index.html</loc>
-    <lastmod>2022-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://klafyvel.me/academics/index.html</loc>
-    <lastmod>2022-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://klafyvel.me/blog/articles/fft-julia/index.html</loc>
-    <lastmod>2022-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
     <loc>https://klafyvel.me/blog/articles/freecad-honeycomb/index.html</loc>
     <lastmod>2022-08-22</lastmod>
     <changefreq>monthly</changefreq>
@@ -50,8 +14,62 @@
     <priority>0.5</priority>
 </url>
 <url>
+    <loc>https://klafyvel.me/blog/articles/fft-julia/index.html</loc>
+    <lastmod>2022-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/academics/index.html</loc>
+    <lastmod>2022-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/contents/index.html</loc>
+    <lastmod>2022-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
     <loc>https://klafyvel.me/blog/index.html</loc>
     <lastmod>2022-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/404/index.html</loc>
+    <lastmod>2022-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/blog/articles/approximate-euclidian-norm/index.html</loc>
+    <lastmod>2022-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/blog/page/index.html</loc>
+    <lastmod>2022-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/blog/articles/fft-arduino/index.html</loc>
+    <lastmod>2022-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/index.html</loc>
+    <lastmod>2022-08-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+</url>
+<url>
+    <loc>https://klafyvel.me/projects/index/</loc>
+    <lastmod>2022-11-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
