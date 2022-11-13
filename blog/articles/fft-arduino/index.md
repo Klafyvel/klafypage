@@ -17,7 +17,7 @@ Julia,
 learn AVR Assembly and write a blog post about it, about one year and a half
 later.
 
-TODO: link to the github here
+There is a [companion GitHub repository](https://github.com/Klafyvel/AVR-FFT) where you can retrieve all the codes presented in this article.
 
 \information{This is the long version of the story. If you are only interested
 in nice plots showing the speed and the accuracy of my proposed solution, please
@@ -143,14 +143,18 @@ tools, such as statistical analysis or plotting libraries. And since you are
 also likely to want to upload your code to the Arduino often, it is convenient to
 be able to upload it programmatically.
 
+This machinery allows testing all the different implementations in a reproducible way. All the examples given in this article are calculated on the following input signal.
+
+\figure{Input signal used in the tests below.}{./test_signal.png}
+
 ## Using `arduino-cli` to upload your code.
 
 At the time I started this project, the [new Arduino IDE](https://docs.arduino.cc/software/ide-v2) 
 wasn't available yet. If you have ever used the `1.x` versions of the IDE, then
 you know why one would like to avoid the old IDE. Thankfully, there is a command-line
 utility that allows uploading code from your terminal: [`arduino-cli`](https://arduino.github.io/arduino-cli/0.28/). If you take a look at the
-GitHub [repository](To-do: GitHub repo), you'll notice a Julia script, which
-purpose's is to upload code to the Arduino and retrieve the results of
+GitHub [repository](https://github.com/Klafyvel/AVR-FFT), you'll notice a Julia script, which
+purpose is to upload code to the Arduino and retrieve the results of
 computations and benchmarks. The upload part is simply a system call to
 `arduino-cli`.
 
@@ -164,7 +168,7 @@ function upload_code(directory)
 end
 ```
 
-## Don't bother with communication protocols.
+## Don't bother with communication protocols over Serial.
 
 At first, I was tempted to use some fancy communication protocols for the serial
 link. This is not useful in our case, because you can simply reset the Arduino
@@ -213,15 +217,29 @@ time !
 
 # Fast, accurate FFT, and other floating-point trickeries.
 
+My first approach was to re-use as much as I could the code I wrote for my FFT tutorial in Julia. That's why I started working with floating-point arithmetic. This also was convenient because it kept away some issues like overflowing numbers, that I had to address once I started working with fixed-point arithmetic.
+
 ## A first dummy implementation of the FFT.
 
-## Occult arts are fun. 😈
+As I said, my first implementation was a simple, stupid translation of one of the codes presented in my Julia tutorial. I did not even bother with writing optimized trigonometry functions, I just wanted something that worked as a basis for other implementations. The code is fairly simple and can be viewed [here](https://github.com/Klafyvel/AVR-FFT/blob/main/ExactFFT/ExactFFT.ino).
+
+As expected, this gives almost error-free results.
+
+\figure{Module of approximate floating-point FFT on Arduino. Comparison with reference implementation.}{./results_ExactFFT.svg}
+
+## Forbidden occult arts are fun. 😈
+
+Now let's move on to more interesting stuffs. The first obvious improvement you can make on the base implementation is [fast trigonometry](#trigonometry_can_be_blazingly_fast), and that's what yields the biggest improvement in terms of speed. Then, I decided to mess around with IEEE-754 to write my own approximate routines for float multiplication, halving and modulus calculation. The idea is always the same: treat IEEE-754 representation of a floating-point number as its logarithm. This does give [weird-looking implementations](https://github.com/Klafyvel/AVR-FFT/blob/72410901891639147376c9a900ef97132eb6e807/FloatFFT/FloatFFT.ino#L346-L376) though. I have written several posts on Zeste-de-Savoir explaining how all these work. It is in French, but I trust you can make DeepL run!
+
+* ["Approximer rapidement le carré d'un nombre flottant"](https://zestedesavoir.com/billets/4153/approximer-rapidement-le-carre-dun-nombre-flottant/) explains how to square a number using its floating-point representation.
+* ["IEEE 754: Quand votre code prend la float"](https://zestedesavoir.com/billets/4199/ieee-754-quand-votre-code-prend-la-float/) explains how the IEEE-754 representation of a number looks alike it's logarithm.
+* ["Multiplications avec Arduino: jetons-nous à la float"](https://zestedesavoir.com/billets/4226/multiplications-avec-arduino-jetons-nous-a-la-float/) explains how the approximate multiplication of two floating-point numbers can be efficiently calculated.
 
 ## Approximate floating-point FFT.
 
 Without further delay, here is a sneak preview of the result I got with the
 approximate floating-point FFT. For a full benchmark, you will have to wait for
-the end of this article!
+the end of this article! The code is available [here](https://github.com/Klafyvel/AVR-FFT/blob/main/FloatFFT/FloatFFT.ino).
 
 \figure{Module of approximate floating-point FFT on Arduino. Comparison with reference implementation.}{./results_FloatFFT.svg}
 
@@ -229,10 +247,10 @@ the end of this article!
 
 Rather than endlessly optimizing the floating-point implementation, I decided to
 change my approach. The main motivation being: **Floats are actually overkill for
-our purpose**. Indeed, they have the ability to represent numbers numbers with a
+our purpose**. Indeed, they have the ability to represent numbers with a
 good relative precision over enormous ranges. However, when calculating FFTs the
 range output variables may cover can indeed vary, but not that much. And most
-importantly, it varies in a *predictable* manner. This means a **fixed-point**
+importantly, it varies **predictably**. This means a **fixed-point**
 representation can be used. Also, because of their amazing properties Floats
 actually take a lot of space in the limited RAM available on a microcontroller.
 And finally, I want to be able to run FFTs on signal read from Arduino's ADC. If
@@ -358,7 +376,7 @@ basically means that if we scale down the signal between each step by dividing
 it by a factor of two, we will keep the signal bounded in $[-1,1]$ at each step!
 
 Note that this does not mean we get the optimal scale for every input signal.
-For example, signals which are poorly periodic would have a lot of low modulus
+For example, signals which are poorly periodic would have a lot of low module
 Fourier coefficients, and would not fully take advantage of the scale offered by
 our representation. I did some tests scaling the array only when it was needed,
 and did not notice many changes in terms of execution times, so that's something
@@ -403,7 +421,7 @@ One other issue with trigonometry I did not see coming is its sensitivity to
 overflow. Since there is basically no protection against it, overflowing a
 fixed-point representation of a number flips the sign. In the case of
 trigonometry this is especially annoying, because that means we add a $\pi$
-phase error for even the slightiest error when values are close to one. And
+phase error for even the slightest error when values are close to one. And
 trust me, it took me some time to understand where the error was coming from. 
 
 To mitigate this, I had to implement my own addition, that saturates to one instead of flipping the sign when overflow happens. The trick here is to use the status register (`SREG`) of the microcontroller to detect overflow. Again this requires doing the addition in assembly, as the check needs to happen right after the addition was performed, and there is no way to tell what the compiler might do between the addition and the actual check. 
@@ -447,21 +465,20 @@ order (check the code if you want to see how!).
 
 ## Calculating modules with a chainsaw.
 
-After a lot of wandering on the internets, I ended up using [Paul Hsieh's
+After a lot of wandering on the Internets, I ended up using [Paul Hsieh's
 technique for computing approximate modules of
 vectors](http://www.azillionmonkeys.com/qed/sqroot.html#distance). However,
 while writing this article I discovered some mistakes and things that could be
 improved in his article, so I ended up writing [a dedicated article on this](/blog/articles/approximate-euclidian-norm/), showing how you can minimize the mean square error, and get at most a 5.3% error.
 
-The main idea is that you can approximate the unit circle using a set of well
-chosen octagons. That reminds me of what a rough cylinder carved using a
+The main idea is that you can approximate the unit circle using a set of well-chosen octagons. That reminds me of what a rough cylinder carved using a
 chainsaw might look like, hence the name of this section.
 
 \figure{One of the figures of the article on approximating the norm. Look at how this look like something carved using a chainsaw!}{/assets/blog/articles/approximate-euclidian-norm/code/output/illustration5.svg}
 
 ## 16 bits fixed-point FFT.
 
-Enough small talk, time for some action! You can find [here]() the code for
+Enough small talk, time for some action! You can find [here](https://github.com/Klafyvel/AVR-FFT/blob/main/Fixed16FFT/Fixed16FFT.ino) the code for
 16-bits fixed-point FFT. The benchmark is available at the end of this
 article, but in the meantime here is the error comparison against reference
 implementation.
@@ -472,7 +489,7 @@ implementation.
 ## 8 bits fixed-point FFT.
 
 And now the fastest FFT on Arduino that I implemented, the 8-bits fixed-point
-FFT! As for previous implementations, you can find the code [here](). Below is a
+FFT! As for previous implementations, you can find the code [here](https://github.com/Klafyvel/AVR-FFT/blob/main/Fixed8FFT/Fixed8FFT.ino). Below is a
 comparison of the calculated module of the FFT against a reference
 implementation.
 
@@ -482,11 +499,11 @@ implementation.
 ## Implementing fixed-point FFT for longer inputs
 
 The Arduino Uno has 2048 bytes of RAM. But because this implementation of the
-FFT needs a input array whose length is a power of two, and because you need
+FFT needs an input array whose length is a power of two, and because you need
 some space for variables,[^determined] the limit would be a 1024 bytes long FFT.
 But the code presented here would have to be modified a bit (not that much).
 From where I am standing I see two major issues:
-1. As discussed previously, trigonometry would need 32-bits arithmetics. That
+1. As discussed previously, trigonometry would need 32-bits arithmetic. That
    means you would need to implement the multiplication and saturating addition
    for those numbers.
 2. The buffers are single bytes right now, so you would need to upgrade them
@@ -500,11 +517,16 @@ bytes-long input arrays.
 
 # Benchmarking all these solutions.
 
-Also benchmark the other existing solutions. Put a link to the Github with all
-the Benchmarks.
+I won't go into the details of how I do the benchmarks here, it's basically just using the Arduino `micros()` function. I present here only two benchmarks: how much time is required to run the FFT, and how "bad" the result is, measured with the [mean squared error](https://en.wikipedia.org/wiki/Mean_squared_error). Now, this is not the perfect way to measure the error made by the algorithm, so I do encourage you to have a look at the different comparison plots above. You will also notice that `ApproxFFT` seems to perform poorly in terms of error for small-sized input arrays. This is because it does not compute the result for frequency 0, so the error is probably over-estimated. Overall, I think it is safe to say that `ApproxFFT` and `Fixed16FFT` introduce the same amount of errors in the calculation. Notice how `ExactFFT` is *literally* billions times more precise than the other FFT algorithms. For 8-bits algorithms, the [quantization](https://en.wikipedia.org/wiki/Quantization_(signal_processing)#Noise_and_error_characteristics) mean squared error is ${}^1/{}_3 LSB^2\approx2\times10^{-5}$, which means there are still sources of error introduced in the algorithm other than simple quantization. The same goes for `ApproxFFT` and `Fixed16FFT`, where the quantization error is approximately $3\times10^{-10}$.
 
-\figure{Timing benchmark}{./execution_time_comparison.svg}
+\figure{Mean-square error benchmark. The y-axis has a logarithmic scale, so you can see how much better `ExactFFT` performs!}{./error_comparison.svg}
 
-\figure{Mean-square error benchmark}{./error_comparison.svg}
+Execution time is where my implementations truly shine. Indeed, you can see that for 256 bytes-long input array, `Fixed8FFT` only needs about 12 ms to compute the FFT, when it takes 52ms for `ApproxFFT` to do the same. And if you need the same level of precision as what `ApproxFFT` offers, you can use `Fixed16FFT`, which only needs about 30ms to perform the computation. It's worth noticing that `FloatFFT` is not far behind, with only 67ms needed to compute the 256 bytes FFT. Of course Exact FFT takes much longer.
+
+\figure{Execution time benchmark. `Fixed8FFT` is truly fast!}{./execution_time_comparison.svg}
 
 # Closing thoughts.
+
+It has been a fun journey! I had a lot of fun and "ha-ha!" moments when debugging all these implementations. As I wrote before, there are ways to improve them, either by making `Fixed8FFT` able to handle longer input arrays, or writing a custom-made addition for floating-point number to speed-up `FloatFFT`. I don't know if I will do it in the near future, as this whole project was just intended to be a small side-project, which ended-up bigger than expected. 
+
+As always, feel free to contact me if you need any further detail on this. You can join me on [mastodon](https://mastodon.social/@klafyvel), or on [GitHub](https://github.com/Klafyvel), or even through the comment section below! In the meantime, have fun with your projects. :)
