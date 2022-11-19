@@ -151,8 +151,8 @@ a &\approx& 0.311
 <p>That was a fun Sunday project&#33; Originally this was intended to be included in a longer blog-post that is yet to be finished, but I figured it was interesting enough to have its own post. The take-home message being, you can approximate the Euclidean norm of a vector with:</p>
 \[
 \begin{align}
-\text{norm}(x,y) &=& \frac{\sqrt{2-\sqrt{2}}}{\frac{\pi}{8}+\frac{1}{2\sqrt{2}}}\max\left(\max(x,y), \frac{1}{\sqrt{2}}(|x|+|y|)\right)\\
-&\approx& 1.026\max\left(\max(x,y), \frac{1}{\sqrt{2}}(|x|+|y|)\right)
+\text{norm}(x,y) &=& \frac{\sqrt{2-\sqrt{2}}}{\frac{\pi}{8}+\frac{1}{2\sqrt{2}}}\max\left(\max(|x|,|y|), \frac{1}{\sqrt{2}}(|x|+|y|)\right)\\
+&\approx& 1.026\max\left(\max(|x|,|y|), \frac{1}{\sqrt{2}}(|x|+|y|)\right)
 \end{align}
 \]
 <p>You&#39;ll get at most a 5.3&#37; error. This is a bit different from what&#39;s proposed on <a href="http://www.azillionmonkeys.com/qed/sqroot.html#distance">Paul Hsieh&#39;s blog-post</a>. Unless I made a mistake, there might be a typo on his blog&#33;</p>
