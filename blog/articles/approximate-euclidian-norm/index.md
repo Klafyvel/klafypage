@@ -453,8 +453,8 @@ That was a fun Sunday project! Originally this was intended to be included in a 
 
 $$
 \begin{align}
-\text{norm}(x,y) &=& \frac{\sqrt{2-\sqrt{2}}}{\frac{\pi}{8}+\frac{1}{2\sqrt{2}}}\max\left(\max(x,y), \frac{1}{\sqrt{2}}(|x|+|y|)\right)\\
-&\approx& 1.026\max\left(\max(x,y), \frac{1}{\sqrt{2}}(|x|+|y|)\right)
+\text{norm}(x,y) &=& \frac{\sqrt{2-\sqrt{2}}}{\frac{\pi}{8}+\frac{1}{2\sqrt{2}}}\max\left(\max(|x|,|y|), \frac{1}{\sqrt{2}}(|x|+|y|)\right)\\
+&\approx& 1.026\max\left(\max(|x|,|y|), \frac{1}{\sqrt{2}}(|x|+|y|)\right)
 \end{align}
 $$
 
