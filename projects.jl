@@ -1,5 +1,38 @@
 projects = [
     (
+        href="https://github.com/Klafyvel/Norg.jl",
+        image="/assets/julia-dots.svg",
+        title="Norg.jl",
+        subtitle="A Norg parser in Julia",
+        intro="""Norg.jl is a library to parse the <a href="https://github.com/nvim-neorg/norg-specs">norg file format</a> used in <a href="https://github.com/nvim-neorg/neorg">NeoVim's neorg</a>.""",
+        site="github.com",
+        tags=["org-mode", "julia", "neorg", "Free software"],
+        date=Date("22-11-2022", dateformat"dd-mm-yy"),
+        highlight=true
+    ),
+    (
+        href="https://github.com/Klafyvel/wireguard-manager",
+        image="https://github.com/Klafyvel/wireguard-manager/raw/main/screenshots/vpn-on.png",
+        title="wireguard-manager",
+        subtitle="Manage wireguard from waybar",
+        intro="""This is a simple, stupid waybar extension for toggling wireguard. It uses rofi for password prompting, but you could use anything you like.""",
+        site="github.com",
+        tags=["sway", "waybar", "wireguard", "Free software"],
+        date=Date("02-08-2022", dateformat"dd-mm-yy"),
+        highlight=true
+    ),
+    (
+        href="https://github.com/Klafyvel/SPEFiles.jl",
+        image="/assets/julia-dots.svg",
+        title="SPEFiles.jl",
+        subtitle="A library to use Lightfield SPE files in Julia. ",
+        intro="""SPEFiles is a library aiming at providing utilities to open Princeton instruments SPE 3.0 files with Julia.""",
+        site="github.com",
+        tags=["Princeton Instruments", "julia", "Free software"],
+        date=Date("12-07-2022", dateformat"dd-mm-yy"),
+        highlight=true
+    ),
+    (
         href="https://github.com/Klafyvel/vim-slime-cells",
         image="https://asciinema.org/a/459056.svg",
         title="vim-slime-cells",
@@ -49,7 +82,7 @@ There is also a nice syntax-highlighting feature for cell boundaries.
         site="github.com",
         tags=["Julia"],
         date=Date("04-09-2021", dateformat"dd-mm-yy"),
-        highlight=true
+        highlight=false
     ),
     (
         href="https://github.com/Klafyvel/Klafybridge",
@@ -75,7 +108,7 @@ Aberrations are expressed in Zernike polynomials.
         site="github.com",
         tags=["Julia", "physics", "optics"],
         date=Date("05-01-2020", dateformat"dd-mm-yy"),
-        highlight=true
+        highlight=false
     ),
     (
         href="https://github.com/Klafyvel/DelaunayMaps.jl",
@@ -99,7 +132,7 @@ Aberrations are expressed in Zernike polynomials.
         site="github.com",
         tags=["Tikz", "LaTeX"],
         date=Date("05-12-2019", dateformat"dd-mm-yy"),
-        highlight=true
+        highlight=false
     ),
     (
         href="https://github.com/Klafyvel/create_account_re2o_poster",
@@ -135,7 +168,7 @@ Aberrations are expressed in Zernike polynomials.
         site="github.com",
         tags=["Engineering", "Gears", "C++", "Free software"],
         date=Date("17-02-2017", dateformat"dd-mm-yy"),
-        highlight=true
+        highlight=false
     ),
     (
         href="https://github.com/Klafyvel/BFInterpreter",
