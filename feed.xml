@@ -157,7 +157,7 @@ a &\approx& 0.311
 \]
 <p>You&#39;ll get at most a 5.3&#37; error. This is a bit different from what&#39;s proposed on <a href="http://www.azillionmonkeys.com/qed/sqroot.html#distance">Paul Hsieh&#39;s blog-post</a>. Unless I made a mistake, there might be a typo on his blog&#33;</p>
 <p>If you are interested in playing with the code used to generate the figures in this article, have a look at the <a href="https://klafyvel.me/assets/blog/articles/approximate-euclidian-norm/notebook.jl">companion notebook</a>&#33;</p>
-<p>As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on <a href="httms://twitter.com/klafyvel">Twitter</a> or <a href="https://mastodon.social/@klafyvel">Mastodon</a>.</p>
+<p>As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on <a href="https://twitter.com/klafyvel">Twitter</a> or <a href="https://mastodon.social/@klafyvel">Mastodon</a>.</p>
  ]]>
   </content:encoded>
     
