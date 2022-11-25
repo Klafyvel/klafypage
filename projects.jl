@@ -1,5 +1,16 @@
 projects = [
     (
+        href="https://github.com/Klafyvel/Norg.jl",
+        image="/assets/julia-dots.svg",
+        title="Norg.jl",
+        subtitle="A Norg parser in Julia",
+        intro="""Norg.jl is a library to parse the <a href="https://github.com/nvim-neorg/norg-specs">norg file format</a> used in <a href="https://github.com/nvim-neorg/neorg">NeoVim's neorg</a>.""",
+        site="github.com",
+        tags=["org-mode", "julia", "neorg", "Free software"],
+        date=Date("22-11-2022", dateformat"dd-mm-yy"),
+        highlight=true
+    ),
+    (
         href="https://github.com/Klafyvel/wireguard-manager",
         image="https://github.com/Klafyvel/wireguard-manager/raw/main/screenshots/vpn-on.png",
         title="wireguard-manager",
@@ -157,7 +168,7 @@ Aberrations are expressed in Zernike polynomials.
         site="github.com",
         tags=["Engineering", "Gears", "C++", "Free software"],
         date=Date("17-02-2017", dateformat"dd-mm-yy"),
-        highlight=true
+        highlight=false
     ),
     (
         href="https://github.com/Klafyvel/BFInterpreter",

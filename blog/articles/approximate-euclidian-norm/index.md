@@ -462,5 +462,5 @@ You'll get at most a 5.3% error. This is a bit different from what's proposed on
 
 If you are interested in playing with the code used to generate the figures in this article, have a look at the [companion notebook](/assets/blog/articles/approximate-euclidian-norm/notebook.jl)!
 
-As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on [Twitter](httms://twitter.com/klafyvel) or [Mastodon](https://mastodon.social/@klafyvel).
+As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on [Twitter](https://twitter.com/klafyvel) or [Mastodon](https://mastodon.social/@klafyvel).
 
