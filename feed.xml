@@ -157,7 +157,7 @@ a &\approx& 0.311
 \]
 <p>You&#39;ll get at most a 5.3&#37; error. This is a bit different from what&#39;s proposed on <a href="http://www.azillionmonkeys.com/qed/sqroot.html#distance">Paul Hsieh&#39;s blog-post</a>. Unless I made a mistake, there might be a typo on his blog&#33;</p>
 <p>If you are interested in playing with the code used to generate the figures in this article, have a look at the <a href="https://klafyvel.me/assets/blog/articles/approximate-euclidian-norm/notebook.jl">companion notebook</a>&#33;</p>
-<p>As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on <a href="https://twitter.com/klafyvel">Twitter</a> or <a href="https://mastodon.social/@klafyvel">Mastodon</a>.</p>
+<p>As always, if you have any question, or want to add something to this post, you can leave me comment or ping me on <a href="httms://twitter.com/klafyvel">Twitter</a> or <a href="https://mastodon.social/@klafyvel">Mastodon</a>.</p>
  ]]>
   </content:encoded>
     
@@ -855,19 +855,13 @@ b ≈ c</code></pre>
 </div><p>However, is this code effective? We can check by comparing the memory footprint and execution speed.</p>
 <pre><code class="language-julia">using BenchmarkTools</code></pre>
 <pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  16.876 μs …  12.990 ms  ┊ GC (min … max): 0.00% … 42.84%
- Time  (median):     19.108 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   25.991 μs ± 169.304 μs  ┊ GC (mean ± σ):  3.95% ±  0.61%      █▅                                                        
-  ▂▅▅███▆▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▂▃▄▄▃▃▃▃▃▂▁▁▂▃▂▂▃▃▂▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
-  16.9 μs         Histogram: frequency by time           39 μs < Memory estimate: 33.97 KiB, allocs estimate: 27.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <pre><code class="language-julia">@benchmark naive_dft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<p><pre><code class="plaintext code-output">BenchmarkTools.Trial: 105 samples with 1 evaluation.
- Range (min … max):  42.351 ms … 61.851 ms  ┊ GC (min … max): 0.00% … 2.90%
- Time  (median):     46.299 ms              ┊ GC (median):    0.00%
- Time  (mean ± σ):   48.020 ms ±  4.551 ms  ┊ GC (mean ± σ):  0.50% ± 1.62%      ▃▁▄  ▄█▆▆▃▃▁                                             
-  ▄▁▆▄███▇▇███████▆▆▄▇▄▄▄▆▆▆▁▄▆▄▁▁▁▁▁▁▁▁▆▁▄▄▁▁▁▆▄▄▁▆▄▄▆▁▁▁▁▁▆ ▄
-  42.4 ms         Histogram: frequency by time        60.3 ms < Memory estimate: 16.03 MiB, allocs estimate: 4.</code></pre> 
+<p><pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre> 
 <div class="message  is-info">
 <div class="message-header">
 <p> Information</p>
@@ -943,19 +937,13 @@ n/N}\sum_{m=0}^{N/2-1}f[2m+1]e^{-2i\pi m\frac{n}{N/2}}\\
 end</code></pre>
 <p>We can check as before that code gives a fair result, then compare its runtime qualities with the reference implementation.</p>
 <pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  17.308 μs …  9.319 ms  ┊ GC (min … max): 0.00% … 45.83%
- Time  (median):     18.813 μs              ┊ GC (median):    0.00%
- Time  (mean ± σ):   22.727 μs ± 93.183 μs  ┊ GC (mean ± σ):  1.88% ±  0.46%   ▄▇██▆▃▁                                  ▂▄▅▄▂             ▂
-  ████████▇▆▅▅▅▅▄▄▄▅▃▅▄▄▄▅▅▅▆▅▆▄▆▅▇▇▇▇▇▇▇▇▇███████▇▇▇▇▇▇▇▇▅▆▅ █
-  17.3 μs      Histogram: log(frequency) by time      38.7 μs < Memory estimate: 33.97 KiB, allocs estimate: 27.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <pre><code class="language-julia">@benchmark my_fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 1174 samples with 1 evaluation.
- Range (min … max):  3.511 ms … 23.508 ms  ┊ GC (min … max): 0.00% … 77.03%
- Time  (median):     3.905 ms              ┊ GC (median):    0.00%
- Time  (mean ± σ):   4.249 ms ±  1.681 ms  ┊ GC (mean ± σ):  2.94% ±  6.60%  █                                                           
-  ██▅▄▄▄▄▄▃▃▅▅▄▃▃▃▃▃▃▃▃▃▂▃▃▂▂▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▂▂▂▂▂▂▂▂▁▁▂▂ ▃
-  3.51 ms        Histogram: frequency by time        6.54 ms < Memory estimate: 1.09 MiB, allocs estimate: 14322.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <p>We can see that we have improved the execution time &#40;by a factor of 8&#41; and the memory footprint of the algorithm &#40;by a factor of 13&#41;, without getting closer to the reference implementation.</p>
 <h2 id="analysis_of_the_first_implementation">Analysis of the first implementation</h2>
 <p>Let&#39;s go back to the previous code: </p>
@@ -1057,19 +1045,13 @@ end</code></pre><div class="message  is-info">
 </div>
 </div><p>We can again measure the performance of this implementation. To keep the comparison fair, the <code>fft&#33;</code> function should be used instead of <code>fft</code>, as it works in place.</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; |&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  17.362 μs …  16.111 ms  ┊ GC (min … max): 0.00% … 33.10%
- Time  (median):     19.093 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   24.535 μs ± 161.059 μs  ┊ GC (mean ± σ):  2.17% ±  0.33%   ▁▆█▇▅▃▁                                     ▅▅▃             ▂
-  ▇███████▇▆▆▅▅▅▄▅▅▄▄▄▄▄▅▄▅▄▅▅▆▅▆▆▆▅▆▆▆▆▆▆▆▆▆▇█████▇▇▅▆▇▆▆▆▆▅▆ █
-  17.4 μs       Histogram: log(frequency) by time      42.1 μs < Memory estimate: 1.72 KiB, allocs estimate: 25.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_2&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  55.132 μs … 350.764 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     55.773 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   63.343 μs ±  15.417 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%  █▃                                       ▅▂                  ▁
-  ██▇▇▅▆▇▄▆▇▇▇▆▇▅▆▆▆▆▅▆▆▅▆▅▄▅▃▅▅▅▅▅▅▅▅▅▆▅▅▅██▆▆▇▆▆▇▇▆▆▆▆▇▆▆▆▆▆ █
-  55.1 μs       Histogram: log(frequency) by time       107 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <p>We have significantly improved our execution time and memory footprint. We can see that there are zero bytes allocated &#40;this means that the compiler does not need to store the few intermediate variables in RAM&#41;, and that the execution time is close to that of the reference implementation.</p>
 <h2 id="the_special_case_of_a_real_signal">The special case of a real signal</h2>
 <p>So far we have reasoned about complex signals, which use two floats for storage. However in many situations we work with real value signals. Now in the case of a real signal, we know that \(\hat{f}\) verifies \(\hat{f}(-\nu) = \overline{\hat{f}(\nu)}\). This means that half of the values we calculate are redundant. Although we calculate the Fourier transform of a real signal, the result can be a complex number. In order to save storage space, we can think of using this half of the array to store complex numbers. For this, two properties will help us.</p>
@@ -1250,19 +1232,13 @@ end</code></pre>
 end</code></pre>
 <p>We can now check the performance of the new implementation:</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  17.630 μs … 247.123 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     19.206 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   23.346 μs ±   9.044 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%   ▅██▅▃                        ▁▁▁▁▁▁▁▁▁▄▅▃                   ▂
-  ███████▇▆▅▅▅▅▅▅▄▃▅▄▅▄▆▅▇▇██▇████████████████▇█▇▇▇▇▇▇█▆▆▅▅▅▆▅ █
-  17.6 μs       Histogram: log(frequency) by time      45.7 μs < Memory estimate: 1.72 KiB, allocs estimate: 25.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_3&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  28.782 μs … 100.122 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     29.276 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   33.700 μs ±   9.410 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%  █▇                                              ▅▃           ▁
-  ██▇█▅▅▄▃▅▅▅▄▅▄▄▅▅▅▅▆▅▅▆▅▅▅▅▅▅▅▅▅▅▆▆▅▅▆▆▆▅▅▅▆▅▅▆▆██▆▅▆▇▆▅▆▇▇▅ █
-  28.8 μs       Histogram: log(frequency) by time      59.1 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <p>This is a very good result&#33;</p>
 <h2 id="optimization_of_trigonometric_functions">Optimization of trigonometric functions</h2>
 <p>If we analyze the execution of <code>my_fft_3</code> using Julia&#39;s <em>profiler</em>, we can see that most of the time is spent computing trigonometric functions and creating the <code>StepRange</code> objects used in <code>for</code> loops. The second problem can be easily circumvented by using <code>while</code> loops. For the first one, in <em>Numerical Recipes</em> we can read &#40;section 5.4 &quot;<em>Recurrence Relations and Clenshaw&#39;s Recurrence Formula</em>&quot;, page 219 of the third edition&#41;:</p>
@@ -1364,22 +1340,17 @@ end</code></pre>
 b &#61; fft&#40;a&#41;
 c &#61; my_fft_4&#40;a&#41;
 real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;</code></pre>
-<pre><code class="plaintext code-output">true</code></pre>
+<pre><code class="plaintext code-output">UndefVarError: `fft` not defined
+</code></pre>
 <p>In terms of performance, we finally managed to outperform the reference implementation&#33;</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  17.393 μs …  17.563 ms  ┊ GC (min … max): 0.00% … 31.36%
- Time  (median):     19.227 μs               ┊ GC (median):    0.00%
- Time  (mean ± σ):   24.551 μs ± 175.678 μs  ┊ GC (mean ± σ):  2.24% ±  0.31%   ▃▅▇█▇▄▂▁                                      ▃▅▅▂          ▂
-  █████████▇▇▆▅▅▅▄▄▃▄▅▄▅▄▄▅▅▆▅▆▇▇▆▆▇▇▇▇▇▇▆▆▇▆▆▆▇██████▇▆▆▆▆▆▆▅ █
-  17.4 μs       Histogram: log(frequency) by time      40.9 μs < Memory estimate: 1.72 KiB, allocs estimate: 25.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_4&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
- Range (min … max):  12.775 μs … 52.808 μs  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     12.984 μs              ┊ GC (median):    0.00%
- Time  (mean ± σ):   13.386 μs ±  1.605 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%  ▂█▂  ▆▁   ▁   ▂                                             ▁
-  ████▇███▆██▅▄▅█▅▄▄▅▄▅▅▄▅▅▅▅▅▄▁▅▅▅▄▄▅▅▅▅▅▅▆▆▅▆▅▆▅▅▅▆▆▆▆▆▆▆▆▅ █
-  12.8 μs      Histogram: log(frequency) by time      20.4 μs < Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
+in expression starting at none:1
+</code></pre>
 <p><table class="fndef" id="fndef:power2">
     <tr>
         <td class="fndef-backref">[4]</td>
@@ -1409,7 +1380,8 @@ values.</figcaption>
 </li>
 </ol>
 <pre><code class="language-julia">real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;</code></pre>
-<pre><code class="plaintext code-output">true</code></pre>
+<pre><code class="plaintext code-output">UndefVarError: `b` not defined
+</code></pre>
 <ol start="3">
 <li><p>Our algorithm was not thought of with numerical stability in mind. This is an aspect that could still be improved. Also, we did not test it on anything other than noise. However, the following block presents some tests that suggest that it &quot;behaves well&quot; for some test functions.</p>
 </li>
@@ -1427,12 +1399,14 @@ endt &#61; range&#40;-10, 10; length&#61;1024&#41;
 y &#61; @. exp&#40;-t^2&#41;
 noise &#61; rand&#40;1024&#41;
 test_signal&#40;y .&#43; noise&#41;</code></pre>
-<pre><code class="plaintext code-output">true</code></pre>
+<pre><code class="plaintext code-output">UndefVarError: `fft` not defined
+</code></pre>
 <pre><code class="language-julia">t &#61; range&#40;-10, 10; length&#61;1024&#41;
 y &#61; @. sin&#40;t&#41;
 noise &#61; rand&#40;1024&#41;
 test_signal&#40;y .&#43; noise&#41;</code></pre>
-<p><pre><code class="plaintext code-output">true</code></pre> 
+<p><pre><code class="plaintext code-output">UndefVarError: `fft` not defined
+</code></pre> 
 </div>
 </div><p>These simplifications and special cases allow our implementation to gain a lot in speed. This makes the implementation of FFTW all the more remarkable, as it still performs very well&#33;</p>
 <table class="fndef" id="fndef:fftw">

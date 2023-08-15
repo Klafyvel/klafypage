@@ -26,6 +26,6 @@ lines!(ν, tf_ech, color=Makie.wong_colors()[2], label=L"\hat{g}(\nu)", linestyl
 lines!([0, 1/step_x_ech, NaN, 1/step_x_ech, 0], [√(π), √(π), NaN, √(π), √(π)] ./
 2, color=:black, linewidth=4)
 text!(L"\nu_{\mathrm{ech}}", position=Point2(1/step_x_ech/2, √(π)/2-0.2),
-align=(:center, :bottom), textsize=24)
+align=(:center, :bottom), fontsize=24)
 axislegend()
 save(joinpath(@OUTPUT, "tf_signal_ech.svg"), current_figure())
