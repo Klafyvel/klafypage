@@ -6,7 +6,7 @@ continuous:
 	${JULIA} --project -e 'using Franklin;serve()'
 
 build:
-	${JULIA} --project -e 'using NodeJS; run(`$$(npm_cmd()) install highlight.js`);using Franklin;optimize()'
+	${JULIA} --project -e 'import Pkg; Pkg.instantiate();using NodeJS; run(`$$(npm_cmd()) install highlight.js`);using Franklin;optimize()'
 
 gh-pages-in: 
 	git worktree add __site/ gh-pages

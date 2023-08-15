@@ -1,5 +1,18 @@
 contents = [
             (
+             href="https://zestedesavoir.com/billets/4505/le-fediverse-dans-tous-ses-meta/",
+             image="https://zestedesavoir.com/media/galleries/21588/187f6afc-3591-41da-bd07-8dbb3861974b.png.60x60_q95_crop.png",
+             subtitle="",
+             title=" Le Fediverse dans tous ses Meta ",
+             intro="Ces dernières semaines ont été mouvementées sur le Fediverse. Les réseaux sociaux fédérés qui le composent, et Mastodon en tête, ont grossi soudainement depuis l’acquisition de Twitter par le controversé Elon Musk. Mais des concurrents commerciaux pourraient bien émerger.
+<br/>
+Ce long article finit par un petit guide pratique pour se mettre au Fediverse. N’hésitez pas à vous y rendre si le reste vous intéresse moins !",
+             date=Date("03-08-2023", dateformat"d-m-y"),
+             tags=["French", "Fediverse"],
+             site="zestedesavoir.com",
+             highlight=true,
+             ),
+            (
              href="https://zestedesavoir.com/billets/4328/petite-lecon-de-vim-apprendre-a-gerer-ses-motions/",
              image="https://zestedesavoir.com/media/galleries/19161/ec9ba647-9b8a-482a-86c7-92f9b904ab44.png.60x60_q95_crop.png",
              subtitle="",
@@ -46,7 +59,6 @@ contents = [
              date=Date("02-08-2022", dateformat"d-m-y"),
              site="zestedesavoir.com",
              tags=["French", "arduino", "assembly", "fixed-point"],
-             highlight=true,
             ), 
             (
              href="https://zestedesavoir.com/billets/4228/utiliser-son-ipad-pro-comme-deuxieme-ecran-avec-sway/",
@@ -67,7 +79,6 @@ contents = [
              date=Date("26-06-2022", dateformat"d-m-y"),
              site="zestedesavoir.com",
              tags=["French", "assembly", "arduino", "float"],
-             highlight=true
             ),
             (
              href="https://zestedesavoir.com/contenus/4199/ieee-754-quand-votre-code-prend-la-float/",
@@ -78,7 +89,6 @@ contents = [
              date=Date("26-05-2022", dateformat"d-m-y"),
              site="zestedesavoir.com",
              tags=["French", "c++", "arduino", "bits", "float"],
-             highlight=true,
             ),
             (
              href="https://zestedesavoir.com/contenus/4153/approximer-rapidement-le-carre-dun-nombre-flottant/",
