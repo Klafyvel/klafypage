@@ -1,5 +1,16 @@
 academics = [
     (
+        href="https://doi.org/10.1002/pssb.202300310",
+        image="/assets/academics/202310_gqd.png",
+        title="Investigation of Rod-Shaped Single-Graphene Quantum Dot",
+        subtitle="Physica Status Solidi (b)",
+        intro="""In recent years, there has been a resurgence of interest in graphene quantum dots (i.e., large polycyclic aromatic hydrocarbons) in particular due to their interesting properties as single-quantum emitters. Herein, a thorough study of a graphene quantum dot made of 96 carbon atoms in a D<sub>2h</sub> symmetry is reported. In particular, experiments at the single-molecule level reveal that this graphene quantum dot structure is a bright and photostable single-photon emitter at room temperature. Finally, a statistical study of the emission wavelength as a function of the graphene quantum dot concentration highlights the high purity and degree of control on the samples.""",
+        date=Date("18-10-2023", dateformat"d-m-y"),
+        site="DOI:10.1002/pssb.202300310",
+        tags=["English", "Spectroscopy", "Graphene Quantum Dots"],
+        highlight=true,
+    ),
+    (
         href="https://doi.org/10.1038/s41467-023-40376-w",
         image="/assets/academics/202308_gqd.png",
         title="Interplay of structure and photophysics of individualized rod-shaped graphene quantum dots with up to 132 sp² carbon atoms",
