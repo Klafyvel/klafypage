@@ -38,7 +38,7 @@
 <p><a href="../en">English version is here.</a></p>
 <hr />
 <h1 id="sur_cette_page">Sur cette page</h1>
-<div class="franklin-toc"><ol><li>Sur cette page</li><li>Résumé de la thèse</li><li>Comment venir ?</li><li>Suivre la présentation à distance.</li><li>Je n&#39;ai jamais assisté à une soutenance de thèse, ça se passe comment ?</li><li>J&#39;ai d&#39;autres questions &#33;</li></ol></div>
+<div class="franklin-toc"><ol><li>Sur cette page</li><li>Résumé de la thèse</li><li>Comment venir ?<ol><li>Détail du parcours depuis l&#39;entrée de l&#39;ENS</li></ol></li><li>Suivre la présentation à distance.</li><li>Je n&#39;ai jamais assisté à une soutenance de thèse, ça se passe comment ?</li><li>J&#39;ai d&#39;autres questions &#33;</li></ol></div>
 <hr />
 <h1 id="résumé_de_la_thèse">Résumé de la thèse</h1>
 <p>Ce travail se concentre sur la spectroscopie optique de deux classes de matériaux en utilisant la microscopie de fluorescence à température ambiante.</p>
@@ -54,13 +54,30 @@
 </li>
 </ul>
 <h1 id="comment_venir">Comment venir ?</h1>
+<p><strong>Attention, sur le plan de l&#39;ens l&#39;amphi 1Z14 s&#39;appelle Amphithéâtre Lagrange.</strong></p>
 <ul>
 <li><p>Pour se rendre à l&#39;ENS, sur le plateau de Saclay, voir <a href="https://ens-paris-saclay.fr/lecole/venir-lecole">ici</a>;</p>
 </li>
 <li><p>Pour trouver l&#39;amphithéâtre dans l&#39;école, on peut utiliser <a href="https://ens-paris-saclay.fr/sites/default/files/2020-09/Plan&#37;20ENS&#37;20Paris-Saclay.pdf">le plan</a>. L&#39;amphithéâtre se trouve au premier étage &#40;au dessus de l&#39;étage mezzanine&#41; dans le bâtiment nord.</p>
 </li>
 </ul>
-<h1 id="suivre_la_présentation_à_distance">Suivre la présentation à distance.</h1>
+<h2 id="détail_du_parcours_depuis_lentrée_de_lens">Détail du parcours depuis l&#39;entrée de l&#39;ENS</h2>
+<p>Depuis l&#39;entrée principale de l&#39;ENS.</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/soutenance/entrance.jpg" alt="Entrée principale"> 
+<figcaption> Entrée principale</figcaption>
+</figure><p>Traverser l&#39;entrée pour aller au jardin. Dire au vigile que vous venez pour ma soutenance en amphi 1Z14.</p><figure style="text-align=center;">
+ <p><span style="color:red;">// Image matching '/assets/blog/articles/soutenance/jardin.jpg' not found. //</span></p> 
+<figcaption> Jardin</figcaption>
+</figure><p>Traverser le jardin pour aller au bâtiment nord &#40;suivre le chemin noir&#41;. Arrivé dans le bâtiment, monter les escaliers jusqu&#39;à arriver dans l&#39;atrium Germaine Tillion.</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/soutenance/atrium.jpg" alt="Atrium"> 
+<figcaption> Atrium</figcaption>
+</figure><p>Vous allez voir des marquages au sol qui vous permettent de voir votre position dans le bâtiment. En restant dans l&#39;atrium, prendre sur votre gauche jusqu&#39;à arriver au marquage 1W23.</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/soutenance/marking.jpg" alt="Marquage 1W23"> 
+<figcaption> Marquage 1W23</figcaption>
+</figure><p>Prendre le couloir pour arriver dans la rangée des Z, l&#39;amphithéâtre est tout proche.</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/soutenance/amphi.jpg" alt="Amphithéâtre 1Z14"> 
+<figcaption> Amphithéâtre 1Z14</figcaption>
+</figure><h1 id="suivre_la_présentation_à_distance">Suivre la présentation à distance.</h1>
 <p>Il y a un lien zoom disponible&#33; Envoyez-moi un message si vous souhaitez suivre la présentation par zoom.</p>
 <h1 id="je_nai_jamais_assisté_à_une_soutenance_de_thèse_ça_se_passe_comment">Je n&#39;ai jamais assisté à une soutenance de thèse, ça se passe comment ?</h1>
 <p>La soutenance de thèse est un examen universitaire qui permet d&#39;accéder au grade de Docteur. En France, sauf exception, la soutenance est publique. </p><div class="message  is-link">
