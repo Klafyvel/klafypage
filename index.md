@@ -58,16 +58,16 @@ academics)
         <div class="content is-medium">
 ~~~
 
-## You Somehow made it to my personal page !
+## Somehow, you made it to my personal page !
 
-I am a PhD student working on hybrid halide perovskites' photophysics. I enjoy making things in my free time, such as small electronics projects, nice physics animations or programming small utilities.
+I am a physicist studying the spectroscopy of materials. I enjoy making things in my free time, such as small electronics projects, nice physics animations or programming small utilities.
 
-I have a degree in engineering from [CentraleSupélec](https://www.centralesupelec.fr/en) (Diplôme d'ingénieur de l'École Supérieure d'Électricité) and a master of science in optics and photonics from [Imperial College London](http://www.imperial.ac.uk/), that I both obtained in 2020. I am currently studying for my PhD in Université Paris-Saclay.
+During my PhD in Laboratoire [LuMIn](https://www.lumin.universite-paris-saclay.fr/fr) (ENS Paris-Saclay, CNRS, Université Paris-Saclay and CentraleSupélec), I worked on hybrid halide perovskites' and graphene quantum dots photophysics. I defended in 2024. I also have a degree in engineering from [CentraleSupélec](https://www.centralesupelec.fr/en) (Diplôme d'ingénieur de l'École Supérieure d'Électricité) and a master of science in optics and photonics from [Imperial College London](http://www.imperial.ac.uk/), that I both obtained in 2020. 
 
-You can find [here](/assets/cv.pdf) an up-to-date CV (august 2022).
+You can find [here](/assets/cv.pdf) an old CV (august 2022).
 
 On this page you can find :
-- My [academics publications](#academics),
+- My [academics publications](#academics), including my thesis,
 - Some highlighted [contents](#contents) that I published on the Internet,
 - Some of my [projects](#projects) that I am proud to share,
 - Some [blog posts](#blogposts),

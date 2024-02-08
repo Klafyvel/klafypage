@@ -1,5 +1,21 @@
 academics = [
     (
+        href="https://theses.hal.science/tel-04429002",
+        image="/assets/academics/202401_gqd_on_mapb.jpg",
+        title="Optical spectroscopy of graphene quantum dots and halide perovskite nanocrystals",
+        subtitle="I defended my thesis, the manuscript is available on HAL.",
+        intro="""This work focuses on the optical spectroscopy of two classes of materials using fluorescence microscopy at room temperature.First, halide perovskites, a class of semiconductors that have known a surge in interest in the last ten years because of their outstanding optoelectronic properties, making them a promising platform for photovoltaic applications, but also light emission in diodes, lasers, and quantum devices. These crystalline materials consist of corner-sharing octahedra with a metallic ion at the center, often lead, and halide ions at the corners: Cl, Br, or I. A cation completes the structure. It is either organic, for example, methylammonium (MA) or formamidinium, or inorganic, for example, cesium. In the context of light emission, halide perovskites are an excellent choice to address the problem of the green gap, that is, the lack of efficient emitters in the green region of the optical spectrum, because of the possibility to tune their band gap thanks to an informed choice of the halide during the synthesis.Moreover, because the synthesis is done at room temperature and involves soft chemistry steps, they are promising for industrial applications. The synthesis and characterization of CsPbBr₃ nanocrystals emitting in the optical spectrum's green region using a new reprecipitation-based method is reported. In particular, the nanocrystals' high calibration and good stability are highlighted.The second part of this study is about graphene quantum dots. Those low-dimensional objects allow the opening of the band gap of graphene, making them fluorescent. These emitters are promising because their atomically-thin structure and tunability make them suitable for realizing nano-sensors. Building on the recently studied structure-properties relationship of rod-shaped graphene quantum dots, a thorough single-molecule study of highly fluorescent graphene quantum dots with 96 sp<sup>2</sup> carbon atoms is reported. The excellent purity of the samples was highlighted. The study of the time dynamics of those single-photon emitters in a polystyrene matrix allowed estimating the characteristic times of the transient dynamic of the quantum dots. Finally, the third part reports the study of the graphene quantum dots on a perovskite surface. The surface of perovskites is of peculiar interest for the realization of devices with these semiconductors, making it an interesting playground to use graphene quantum dots. To that end, the quantum dots were deposited on a millimetric MAPbBr<sub>3</sub> single-crystal surface. 
+                            <ul>
+                                <li>As thin films deposited on the perovskite, the graphene quantum dots present photophysics compatible with the formation of excimers.</li> 
+                                <li>As the concentration of quantum dots on the surface is lowered, diffraction-limited spots are observed. The time-domain study of the photoluminescence reveals jumps between discrete states of the system.</li> 
+                                <li>The frequency-domain investigation of the intensity of photoluminescence of these diffraction-limited emitters is dominated by 1/f noise, which highly contrasts the stable, shot-noise-dominated dynamics of the single emitters when studied in a polystyrene matrix.</li>
+                            </ul>""",
+        date=Date("24-01-2024", dateformat"d-m-y"),
+        site="HAL",
+        tags=["English", "Spectroscopy", "Halide Perovskites", "Graphene Quantum Dots"],
+        highlight=true,
+    ),
+    (
         href="https://doi.org/10.1002/pssb.202300310",
         image="/assets/academics/202310_gqd.png",
         title="Investigation of Rod-Shaped Single-Graphene Quantum Dot",
