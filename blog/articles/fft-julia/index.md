@@ -3,6 +3,7 @@
 @def mintoclevel=1
 @def rss_description = "An implementation of the FFT using Julia!"
 @def rss_pubdate = Date(2022, 02, 12)
+@def noeval = true
 
 The Fourier transform is an essential tool in many fields, be it in Physics, Signal Processing, or Mathematics. The method that is probably the most known to calculate it numerically is called the **FFT** for *Fast Fourier Transform*. In this little tutorial, I propose to try to understand and implement this algorithm in an efficient way. I will use the language [Julia](https://julialang.org/), but it should be possible to follow using other languages such as Python or C. We will compare the results obtained with those given by [the Julia port of the FFTW library](https://github.com/JuliaMath/FFTW.jl).
 
@@ -15,9 +16,14 @@ off please tell me, as it is likely an error coming from the translation step. Y
 
 \information{This page used to be generated dynamically, but the benchmarks would break every so often because of that. It is now generated statically. The current page was generated with the following julia setup:
 ```julia-repl
-
+pkg> st
+Status `/tmp/jl_AEhNcq/Project.toml`
+  [6e4b80f9] BenchmarkTools v1.5.0
+  [13f3f980] CairoMakie v0.12.4
+  [7a1cc6ca] FFTW v1.8.0
+  [65edfddc] SixelTerm v1.3.0
 ```
-On my personnal computer (Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz)
+On my personnal computer (Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz). The full code for this article is available [here](/blog/articles/fft-julia/code.jl).
 }
 
 [^numerical]: William H. Press, Saul A. Teukolsky, William T. Vetterling, & Brian P. Flannery. (2007). Numerical Recipes 3rd Edition: The Art of Scientific Computing (3rd ed.). Cambridge University Press.
@@ -99,15 +105,12 @@ $$
 
 If we plot the Fourier transform of the starting signal $\hat{f}$ and that of the sampled signal $\hat{g}$, we obtain the following plot:
 
-\figure{Fourier transform of the signal and its sampled
-signal}{./tf_signal_ech.svg}
+\figure{Fourier transform of the signal and its sampled signal}{./tf_signal_ech.svg}
 
 \information{
 We notice that the sampling of the signal has led to the periodization of its
 Fourier transform. This leads to an important property in signal processing: the
 [Nyquist-Shanon criterion](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem), and one of its consequences, spectrum aliasing. I let you consult the Wikipedia article about this if you are interested, but you can have a quick idea of what happens if you draw the previous plot with a too large sampling: the bells of the sampled signal transform overlap.
-``
-
 \figure{Fourier transform of the signal and its sampled signal, illustrating
 aliasing.}{./tf_signal_ech_aliasing.svg}
 }
@@ -989,7 +992,7 @@ BenchmarkTools.Trial: 10000 samples with 1 evaluation.
  Memory estimate: 304 bytes, allocs estimate: 4.
 ```
 
-```julia:./code/code23.jl
+```julia
 @benchmark my_fft_4(x) setup=(x = rand(1024))
 ```
 ```
