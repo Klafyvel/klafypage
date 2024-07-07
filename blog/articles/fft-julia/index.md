@@ -16,6 +16,20 @@ off please tell me, as it is likely an error coming from the translation step. Y
 
 \information{This page used to be generated dynamically, but the benchmarks would break every so often because of that. It is now generated statically. The current page was generated with the following julia setup:
 ```julia-repl
+julia> versioninfo()
+Julia Version 1.10.4
+Commit 48d4fd48430 (2024-06-04 10:41 UTC)
+Build Info:
+  Official https://julialang.org/ release
+Platform Info:
+  OS: Linux (x86_64-linux-gnu)
+  CPU: 4 × Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz
+  WORD_SIZE: 64
+  LIBM: libopenlibm
+  LLVM: libLLVM-15.0.7 (ORCJIT, skylake)
+Threads: 1 default, 0 interactive, 1 GC (on 4 virtual cores)
+Environment:
+  LD_PRELOAD = /usr/lib64/libstdc++.so.6
 pkg> st
 Status `/tmp/jl_AEhNcq/Project.toml`
   [6e4b80f9] BenchmarkTools v1.5.0
@@ -23,7 +37,7 @@ Status `/tmp/jl_AEhNcq/Project.toml`
   [7a1cc6ca] FFTW v1.8.0
   [65edfddc] SixelTerm v1.3.0
 ```
-On my personnal computer (Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz). The full code for this article is available [here](/blog/articles/fft-julia/code.jl).
+The full code for this article is available [here](/blog/articles/fft-julia/code.jl).
 }
 
 [^numerical]: William H. Press, Saul A. Teukolsky, William T. Vetterling, & Brian P. Flannery. (2007). Numerical Recipes 3rd Edition: The Art of Scientific Computing (3rd ed.). Cambridge University Press.
