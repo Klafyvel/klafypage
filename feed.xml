@@ -803,13 +803,27 @@ fixed_t fixed_add_saturate&#40;fixed_t a, fixed_t b&#41; &#123;
 </div>
 <div class="message-body">
   This page used to be generated dynamically, but the benchmarks would break every so often because of that. It is now generated statically. The current page was generated with the following julia setup:</p>
-<pre><code class="language-julia-repl">pkg&gt; st
+<pre><code class="language-julia-repl">julia&gt; versioninfo&#40;&#41;
+Julia Version 1.10.4
+Commit 48d4fd48430 &#40;2024-06-04 10:41 UTC&#41;
+Build Info:
+  Official https://julialang.org/ release
+Platform Info:
+  OS: Linux &#40;x86_64-linux-gnu&#41;
+  CPU: 4 × Intel&#40;R&#41; Core&#40;TM&#41; i7-6600U CPU @ 2.60GHz
+  WORD_SIZE: 64
+  LIBM: libopenlibm
+  LLVM: libLLVM-15.0.7 &#40;ORCJIT, skylake&#41;
+Threads: 1 default, 0 interactive, 1 GC &#40;on 4 virtual cores&#41;
+Environment:
+  LD_PRELOAD &#61; /usr/lib64/libstdc&#43;&#43;.so.6
+pkg&gt; st
 Status &#96;/tmp/jl_AEhNcq/Project.toml&#96;
   &#91;6e4b80f9&#93; BenchmarkTools v1.5.0
   &#91;13f3f980&#93; CairoMakie v0.12.4
   &#91;7a1cc6ca&#93; FFTW v1.8.0
   &#91;65edfddc&#93; SixelTerm v1.3.0</code></pre>
-<p>On my personnal computer &#40;Intel&#40;R&#41; Core&#40;TM&#41; i7-6600U CPU @ 2.60GHz&#41;. The full code for this article is available <a href="https://klafyvel.me/blog/articles/fft-julia/code.jl">here</a>. 
+<p>The full code for this article is available <a href="https://klafyvel.me/blog/articles/fft-julia/code.jl">here</a>. 
 </div>
 </div><p><table class="fndef" id="fndef:numerical">
     <tr>
