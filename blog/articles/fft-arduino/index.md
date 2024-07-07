@@ -266,7 +266,7 @@ This means we can use it to have a speed-efficient implementation of the
 multiplication, that should even beat the custom `float` one.
 
 I wrote a
-[blog-post](https://zestedesavoir.com/contenus/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/)
+[blog-post](https://zestedesavoir.com/billets/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/)
 on Zeste-de-Savoir (in French) on implementing the fixed-point multiplication.
 It is based on the proposed implementation in the AVR instruction set manual.
 
@@ -279,9 +279,6 @@ fixed_t fixed_mul(fixed_t a, fixed_t b) {
       "clr r2" "\n\t"
       "fmuls %B[a],%B[b]" "\n\t" // Multiply the MSBs
       "movw %A[result],__tmp_reg__" "\n\t" // Save the result
-      "mov __tmp_reg__,%B[a]" "\n\t"
-      "eor __tmp_reg__,%B[b]" "\n\t"
-      "eor __tmp_reg__,%B[result]" "\n\t"
       "fmul %A[a],%A[b]" "\n\t" // Multiply the LSBs
       "adc %A[result],r2" "\n\t" // Do not forget the carry
       "movw r18,__tmp_reg__" "\n\t" // The result of the LSBs multipliplication is stored in temporary registers
