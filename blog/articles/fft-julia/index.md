@@ -13,6 +13,13 @@ This tutorial is intended for people who have already had the opportunity to enc
 translation (using Deepl and a few manual modifications). If something seems
 off please tell me, as it is likely an error coming from the translation step. You can even [open an issue](https://github.com/Klafyvel/klafypage/issues/new/choose) on Github, or [create a pull-request](https://github.com/Klafyvel/klafypage/compare) to fix the issue !}
 
+\information{This page used to be generated dynamically, but the benchmarks would break every so often because of that. It is now generated statically. The current page was generated with the following julia setup:
+```julia-repl
+
+```
+On my personnal computer (Intel(R) Core(TM) i7-6600U CPU @ 2.60GHz)
+}
+
 [^numerical]: William H. Press, Saul A. Teukolsky, William T. Vetterling, & Brian P. Flannery. (2007). Numerical Recipes 3rd Edition: The Art of Scientific Computing (3rd ed.). Cambridge University Press.
 
 ----
@@ -49,62 +56,10 @@ I suggest you to reason on a toy signal which will have the shape of a Gaussian.
 This makes the reasoning a little simpler because the Fourier transform of a
 real Gaussian is also a real Gaussian[^gaussian], which simplifies the graphical representations. 
 
-```julia:./code/import.jl
-#hideall
-using Pkg
-Pkg.activate(temp=true)
-Pkg.add(["FFTW", "CairoMakie", "BenchmarkTools"])
-using FFTW, CairoMakie, BenchmarkTools
-```
 
 
-```julia:./illustration1.jl
-#hideall
-gaussian(x, a=1) = exp(-(a*x)^2)
-ft_of_gaussian(ν,a=1) = √(π/a)*exp(-(π*ν)^2/a)
 
-minx=-50
-maxx=50
-stepx=0.01
-minν=-5
-maxν=5
-stepν=0.01
-showx=(-5,5)
-showν=(-5,5)
-x = minx:stepx:maxx
-ν = minν:stepν:maxν
-
-theme = Theme(
-         fontsize=24,
-         resolution=(800,300),
-         Axis=(
-           xgridvisible=false,
-           ygridvisible=false,
-           yticksvisible=false,
-           yticklabelsvisible=false,
-         ),
-         Lines=(
-           linewidth=8,
-         ),
-         Scatter=(
-           markerstrokewidth=0, markersize=12,
-           color=Makie.wong_colors()[2],
-           )
-       )
-set_theme!(theme)
-
-lines(
-  x, gaussian.(x),
-  label=L"$f(x)$", axis=(xlabel=L"x",),
-  color=Makie.wong_colors()[1],
-)
-xlims!(showx[1], showx[2])
-axislegend()
-resize_to_layout!(current_figure())
-save(joinpath(@OUTPUT, "signal.svg"), current_figure())
-```
-
-\figure{The signal which will be used as an example}{./output/signal.svg}
+\figure{The signal which will be used as an example}{./signal.svg}
 
 More formally, we have:
 
@@ -120,27 +75,7 @@ $$
 $$
 With $\delta$ the [Dirac distribution](https://fr.wikipedia.org/wiki/Distribution_de_Dirac). Here is the plot that we can obtain if we represent $f$ and $g=ш_T\times f$ together:
 
-```julia:./illustration2.jl
-#hideall
-lines(
-  x, gaussian.(x),
-  label=L"$f(x)$", axis=(xlabel=L"x",),
-  color=Makie.wong_colors()[1],
-)
-x_ech = minx:0.5:maxx
-y = gaussian.(x_ech)
-nans = repeat([NaN], length(x_ech))
-z = repeat([0], length(y))
-x_display = collect(Iterators.flatten(zip(x_ech,x_ech,nans)))
-y_display = collect(Iterators.flatten(zip(z,y,nans)))
-lines!(x_display, y_display, color=Makie.wong_colors()[2], linewidth=4)
-scatter!(x_ech, y, label=L"g(x)", color=Makie.wong_colors()[2])
-
-xlims!(showx[1], showx[2])
-axislegend()
-save(joinpath(@OUTPUT, "signal_ech.svg"), current_figure())
-```
-\figure{The signal and the sampled signal.}{./output/signal_ech.svg}
+\figure{The signal and the sampled signal.}{./signal_ech.svg}
 
 The Fourier transform of the new $g$ function is written [^math] :
 
@@ -164,70 +99,17 @@ $$
 
 If we plot the Fourier transform of the starting signal $\hat{f}$ and that of the sampled signal $\hat{g}$, we obtain the following plot:
 
-```julia:./illustration3.jl
-#hideall
-sampled_ft(ν,νech, a=1) = begin
-	res = zeros(length(ν))
-	mini_ν = minimum(ν)
-	maxi_ν = maximum(ν)
-	origins = [2*mini_ν:νech:-νech; 0:νech:2*maxi_ν]
-	for ν₀ ∈ origins
-		res .+= ft_of_gaussian.(ν .- ν₀, a)
-	end
-	res
-end
-
-tf_sig = ft_of_gaussian.(ν)
-
-lines(
-  ν, abs.(tf_sig),
-  label=L"$\hat{f}(\nu)$", color=Makie.wong_colors()[1],
-  axis=(xlabel=L"\nu", ylabel="Modulus"),
-)
-xlims!(showν[1], showν[2])
-step_x_ech = stepx * 40
-tf_ech = sampled_ft(ν, 1/step_x_ech)
-
-lines!(ν, tf_ech, color=Makie.wong_colors()[2], label=L"\hat{g}(\nu)", linestyle=:dash)
-lines!([0, 1/step_x_ech, NaN, 1/step_x_ech, 0], [√(π), √(π), NaN, √(π), √(π)] ./
-2, color=:black, linewidth=4)
-text!(L"\nu_{\mathrm{ech}}", position=Point2(1/step_x_ech/2, √(π)/2-0.2),
-align=(:center, :bottom), fontsize=24)
-axislegend()
-save(joinpath(@OUTPUT, "tf_signal_ech.svg"), current_figure())
-```
-
 \figure{Fourier transform of the signal and its sampled
-signal}{./output/tf_signal_ech.svg}
+signal}{./tf_signal_ech.svg}
 
 \information{
 We notice that the sampling of the signal has led to the periodization of its
 Fourier transform. This leads to an important property in signal processing: the
 [Nyquist-Shanon criterion](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem), and one of its consequences, spectrum aliasing. I let you consult the Wikipedia article about this if you are interested, but you can have a quick idea of what happens if you draw the previous plot with a too large sampling: the bells of the sampled signal transform overlap.
-
-```julia:./illustration4.jl
-#hideall
-lines(
-	ν, abs.(tf_sig), 
-  label=L"$\hat{f}(\nu)$", color=Makie.wong_colors()[1],
-  axis=(xlabel=L"\nu", ylabel="Modulus"),
-)
-xlims!(showν[1], showν[2])
-	
-step_x_ech = stepx * 150
-tf_ech = sampled_ft(ν, 1/step_x_ech)
-lines!(ν, tf_ech, color=Makie.wong_colors()[2], label=L"\hat{g}(\nu)",
-linestyle=:dot)
-lines!([0, 1/step_x_ech, NaN, 1/step_x_ech, 0], [√(π), √(π), NaN, √(π), √(π)] .*
-0.8, linewidth=4, color=:black)
-text!(L"\nu_{\mathrm{ech}}", position=Point2(1/step_x_ech/2, √(π)*0.8-0.2),
-align=(:center,:bottom), fontsize=24)
-axislegend()
-save(joinpath(@OUTPUT, "tf_signal_ech_aliasing.svg"), current_figure())
-```
+``
 
 \figure{Fourier transform of the signal and its sampled signal, illustrating
-aliasing.}{./output/tf_signal_ech_aliasing.svg}
+aliasing.}{./tf_signal_ech_aliasing.svg}
 }
 
 We can then look at the windowing process. There are several methods that each have their advantages, but we will focus here only on the rectangular window. The principle is simple: we only look at the values of $f$ for $x$ between $-x_0$ and $+x_0$. This means that we multiply the function $f$ by a gate function $\Pi_{x_0}$ which verifies:
@@ -241,31 +123,7 @@ $$
 
 Graphically, here is how we could represent $h$ and $f$ together.
 
-```julia:./illustration5.jl
-#hideall
-lines(
-  x, gaussian.(x),
-  label=L"$f(x)$", axis=(xlabel=L"x",),
-  color=Makie.wong_colors()[1],
-)
-xlims!(showν[1], showν[2])
-x_ech = (minx*0.05):0.5:(maxx*0.05)
-y = gaussian.(x_ech)
-nans = repeat([NaN], length(x_ech))
-z = repeat([0], length(y))
-x_display = collect(Iterators.flatten(zip(x_ech,x_ech,nans)))
-y_display = collect(Iterators.flatten(zip(z,y,nans)))
-lines!(x_display, y_display, color=Makie.wong_colors()[2], linewidth=4)
-scatter!(x_ech, y, label=L"h(x)", color=Makie.wong_colors()[2])
-lines!([minx*0.05, maxx*0.05, NaN, maxx*0.05, minx*0.05], [1, 1, NaN, 1, 1] ./
-2, color=:black, linewidth=4)
-text!(L"2x_0", position=Point2(0, 1/2-0.2),
-align=(:center,:bottom), fontsize=24)
-
-axislegend()
-save(joinpath(@OUTPUT, "signal_ech_fen.svg"), current_figure())
-```
-\figure{Signal sampled and windowed}{./output/signal_ech_fen.svg}
+\figure{Signal sampled and windowed}{./signal_ech_fen.svg}
 
 
 Concretely, this is equivalent to limiting the sum of the Dirac comb to a finite number of terms. We can then write the Fourier transform of $h=Pi_{x_0} \times ш_T \times f$ :
@@ -299,33 +157,8 @@ $$
 
 To get the last line, I re-indexed $f[k]$ to start at 0, noting $N$ the number of samples. I then assumed that the window size corresponded to an integer number of samples, i.e. that $2x_0 = N\times T$, which is rewritten as $N\times \nu_s = \nu_{\text{ech}}$. This expression is the **discrete Fourier transform** of the signal.
 
-```julia:./illustration6.jl
-#hideall
-lines(
-	ν, abs.(tf_sig), 
-  label=L"$\hat{f}(\nu)$", color=Makie.wong_colors()[1],
-  axis=(xlabel=L"\nu", ylabel="Modulus"),
-)
-xlims!(showν[1], showν[2])
-deuxx₀ = (maxx*0.05) - (minx*0.05)
-step_x_ech = stepx * 40
-
-ν_ech = minν:(1/deuxx₀):maxν#[(-1/2step_x_ech):(1/deuxx₀):(-1/deuxx₀); 0:(1/deuxx₀):(1/2step_x_ech)]
-tf_ech = sampled_ft(ν_ech, 1/step_x_ech)
-
-nans = repeat([NaN], length(tf_ech))
-z = repeat([0], length(tf_ech))
-x_display = collect(Iterators.flatten(zip(ν_ech,ν_ech,nans)))
-y_display = collect(Iterators.flatten(zip(z,tf_ech,nans)))
-lines!(x_display, y_display, color=Makie.wong_colors()[2], linewidth=4)
-scatter!(ν_ech, tf_ech, label=L"\hat{l}(\nu)", color=Makie.wong_colors()[2])
-
-axislegend()
-save(joinpath(@OUTPUT, "signal_ech_fen_ech.svg"), current_figure())
-```
-
 \figure{Sampling the Fourier transform of the sampled signal to obtain the
-discrete Fourier transform}{./output/signal_ech_fen_ech.svg}
+discrete Fourier transform}{./signal_ech_fen_ech.svg}
 
 \information{We can see that the sampling frequency does not enter into this equation, and
 there are many applications where we simply forget that this frequency exists.}
@@ -344,34 +177,8 @@ $$
 
 To conclude on our example function, we obtain the following plot: 
 
-```julia:./illustration7.jl
-#hideall
-lines(
-	ν, abs.(tf_sig), 
-  label=L"$\hat{f}(\nu)$", color=Makie.wong_colors()[1],
-  axis=(xlabel=L"\nu", ylabel="Modulus"),
-)
-xlims!(showν[1], showν[2])
-deuxx₀ = (maxx*0.05) - (minx*0.05)
-step_x_ech = stepx * 40
-
-ν_ech = minν:(1/deuxx₀):maxν
-ν_ech = ν_ech[0 .<= ν_ech .< 1/step_x_ech]
-tf_ech = sampled_ft(ν_ech, 1/step_x_ech)
-
-nans = repeat([NaN], length(tf_ech))
-z = repeat([0], length(tf_ech))
-x_display = collect(Iterators.flatten(zip(ν_ech,ν_ech,nans)))
-y_display = collect(Iterators.flatten(zip(z,tf_ech,nans)))
-
-lines!(x_display, y_display, color=Makie.wong_colors()[2], linewidth=4)
-scatter!(ν_ech, tf_ech, label=L"\hat{l}(\nu)", color=Makie.wong_colors()[2])
-
-axislegend()
-save(joinpath(@OUTPUT, "signal_ech_fen_ech_fen.svg"), current_figure())
-```
 \figure{Windowing of the discrete Fourier transform for
-storage}{./output/signal_ech_fen_ech_fen.svg}
+storage}{./signal_ech_fen_ech_fen.svg}
 
 ## Calculating the discrete Fourier transform
 
@@ -405,7 +212,7 @@ Those in the know will notice that this is a [Vandermonde matrix](https://en.wik
 
 So this calculation can be implemented relatively easily!
 
-```julia:./code/code1.jl
+```julia
 function naive_dft(x)
   N = length(x)
   k = reshape(0:(N-1), 1, :)
@@ -427,7 +234,7 @@ And to check that it does indeed give the right result, it is enough to compare 
 using FFTW
 ```
 
-```julia:./code/code2.jl
+```julia
 a = rand(1024)
 b = fft(a)
 c = naive_dft(a)
@@ -445,15 +252,37 @@ However, is this code effective? We can check by comparing the memory footprint 
 using BenchmarkTools
 ```
 
-```julia:./code/code3.jl
+```julia
 @benchmark fft(a) setup=(a = rand(1024))
 ```
-\show{./code/code3.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  18.290 μs … 333.143 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     44.453 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   47.263 μs ±  12.066 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-```julia:./code/code4.jl
+                  ▁▇▆█▁▄
+  ▂▂▁▁▂▂▁▁▂▂▁▂▁▁▃▆███████▆▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂ ▃
+  18.3 μs         Histogram: frequency by time         98.7 μs <
+
+ Memory estimate: 32.55 KiB, allocs estimate: 6.
+```
+
+```julia
 @benchmark naive_dft(a) setup=(a = rand(1024))
 ```
-\show{./code/code4.jl}
+```
+BenchmarkTools.Trial: 100 samples with 1 evaluation.
+ Range (min … max):  35.577 ms … 571.900 ms  ┊ GC (min … max):  0.00% … 88.11%
+ Time  (median):     40.820 ms               ┊ GC (median):     0.00%
+ Time  (mean ± σ):   50.326 ms ±  53.354 ms  ┊ GC (mean ± σ):  11.18% ± 10.10%
+
+    ▂█
+  ▅▅██▅▆▆▅▄▄▁▄▁▁▁▄▁▁▄▁▅█▄▆▄▃▃▄▅▅▁▃▁▁▁▁▁▁▃▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▃ ▃
+  35.6 ms         Histogram: frequency by time         80.2 ms <
+
+ Memory estimate: 16.03 MiB, allocs estimate: 4.
+```
 \information{As you can see, the maximum execution time of the reference
 implementation is two orders of magnitude higher than the average and median
 execution time. This is due to Julia's *Just in time* (JIT) compilation. If we
@@ -535,7 +364,7 @@ $$
 
 This means that by computing two Fourier transforms of length $N/2$, we are able to compute two elements of a Fourier transform of length $N$. Assuming for simplicity that $N$ is a power of two[^power2], this naturally draws a recursive implementation of the FFT. According to the [master theorem](https://fr.wikipedia.org/wiki/Master_theorem), this algorithm will have complexity $\mathcal{O}(N\log_2 N)$, which is much better than the first naive algorithm we implemented, which has complexity in $\mathcal{O}(N^2)$.
 
-```julia:./code/code5.jl
+```julia
 function my_fft(x)
   # Stop condition, the TF of an array of size 1 is this same array.
   if length(x) <= 1
@@ -554,14 +383,36 @@ end
 
 We can check as before that code gives a fair result, then compare its runtime qualities with the reference implementation.
 
-```julia:./code/code6.jl
+```julia
 @benchmark fft(a) setup=(a = rand(1024))
 ```
-\show{./code/code6.jl}
-```julia:./code/code7.jl
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  15.262 μs … 67.122 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     16.877 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   18.290 μs ±  3.125 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+     ▇█▂
+  ▁▂▇███▆▄▄▄▃▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
+  15.3 μs         Histogram: frequency by time        27.9 μs <
+
+ Memory estimate: 32.55 KiB, allocs estimate: 6.
+```
+```julia
 @benchmark my_fft(a) setup=(a = rand(1024))
 ```
-\show{./code/code7.jl}
+```
+BenchmarkTools.Trial: 3399 samples with 1 evaluation.
+ Range (min … max):  983.141 μs … 586.032 ms  ┊ GC (min … max):  0.00% … 99.48%
+ Time  (median):       1.113 ms               ┊ GC (median):     0.00%
+ Time  (mean ± σ):     1.464 ms ±  10.067 ms  ┊ GC (mean ± σ):  17.52% ±  9.04%
+
+  ██▅▂▁▄▂▁▂▁                                                    ▁
+  ████████████▇▄▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▃▄▅ █
+  983 μs        Histogram: log(frequency) by time       7.58 ms <
+
+ Memory estimate: 989.12 KiB, allocs estimate: 10230.
+```
 
 We can see that we have improved the execution time (by a factor of 8) and the memory footprint of the algorithm (by a factor of 13), without getting closer to the reference implementation.
 
@@ -570,7 +421,7 @@ We can see that we have improved the execution time (by a factor of 8) and the m
  
 Let's go back to the previous code: 
 
-```julia:./code/code8.jl
+```julia
 function my_fft(x)
   # Stop condition, the TF of an array of size 1 is this same array.
   if length(x) <= 1
@@ -636,7 +487,7 @@ We can separate the inversion process in several steps. First we exchange the 5 
 
 An example of implementation would be the following:
 
-```julia:./code/code9.jl
+```julia
 bit_reverse(::Val{10}, num) = begin
   num = ((num&0x3e0)>>5)|((num&0x01f)<<5)
   num = ((num&0x318)>>3)|(num&0x084)|((num&0x063)<<3)
@@ -647,7 +498,7 @@ end
 An equivalent algorithm can be applied for all values of $p$, you just have to be careful not to change the central bits anymore when you have an odd number of bits in a half word. In the following there is an example for several word lengths.
 
 \secret{
-```julia:./code/code10.jl
+```julia
 bit_reverse(::Val{64}, num) = bit_reverse(Val(32), (num&0xffffffff00000000)>>32)|(bit_reverse(Val(32), num&0x00000000ffffff)<<32)
 bit_reverse(::Val{32}, num) = bit_reverse(Val(16), (num&0xffff0000)>>16)|(bit_reverse(Val(16), num&0x0000ffff)<<16)
 bit_reverse(::Val{16}, num) = bit_reverse(Val(8), (num&0xff00)>>8)|(bit_reverse(Val(8), num&0x00ff)<<8)
@@ -661,7 +512,7 @@ bit_reverse(::Val{1}, num) = num
 
 Then we can do the permutation itself. The algorithm is relatively simple: just iterate over the array, calculate the inverted index of the current index and perform the inversion. The only subtlety is that the inversion must be performed only once per index of the array, so we discriminate by performing the inversion only if the current index is lower than the inverted index.
 
-```julia:./code/code11.jl
+```julia
 function reverse_bit_order!(X, order)
   N = length(X)
   for i in 0:(N-1)
@@ -680,7 +531,7 @@ end
 We are now sufficiently equipped to start a second implementation of the FFT.
 The first step will be to compute the reverse bit permutation. Then we will be able to compute the Fourier transform following the scheme shown previously. To do this we will store the size $n_1$ of the sub-arrays and the number of cells $n_2$ in the global array that separate two elements of the same index in the sub-arrays. The implementation can be done as follows:
 
-```julia:./code/code12.jl
+```julia
 function my_fft_2(x)
   N = length(x)
   order = Int(log2(N))
@@ -713,15 +564,37 @@ array overflow checks.}
 
 We can again measure the performance of this implementation. To keep the comparison fair, the `fft!` function should be used instead of `fft`, as it works in place.
 
-```julia:./code/code13.jl
+```julia
 @benchmark fft!(a) setup=(a = rand(1024) |> complex)
 ```
-\show{./code/code13.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  16.501 μs … 156.742 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     20.942 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   24.874 μs ±   8.820 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-```julia:./code/code14.jl
+    █▇▁
+  ▂▇████▅▄▄▄▃▂▅▄▂▃▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▃▃▃▃▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
+  16.5 μs         Histogram: frequency by time           52 μs <
+
+ Memory estimate: 304 bytes, allocs estimate: 4.
+```
+
+```julia
 @benchmark my_fft_2(a) setup=(a = rand(1024) .|> complex)
 ```
-\show{./code/code14.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  46.957 μs … 152.061 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     50.283 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   55.079 μs ±  10.720 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+   ▅ █▃▁▆▂ ▄  ▃  ▂   ▁    ▂    ▁    ▁                          ▁
+  ██▇██████████████▇▇█▇▇▇▇█▇▆▆██▅▅▅▆█▆▆▆▇▇██▇▇█▇▆▆▆▇▅▇▅▅▆▅▅▅▅▆ █
+  47 μs         Histogram: log(frequency) by time      98.7 μs <
+
+ Memory estimate: 0 bytes, allocs estimate: 0.
+```
 
 We have significantly improved our execution time and memory footprint. We can see that there are zero bytes allocated (this means that the compiler does not need to store the few intermediate variables in RAM), and that the execution time is close to that of the reference implementation.
 
@@ -848,7 +721,7 @@ After this little unpleasant moment, we are ready to implement a new version of 
 
  
 Since the actual computation of the FFT is done on an array that is half the size of the input array, we need a function to compute the inverted index on 9 bits to be able to continue testing on 1024 points.
-```julia:./code/code15.jl
+```julia
 bit_reverse(::Val{9}, num) = begin
   num = ((num&0x1e0)>>5)|(num&0x010)|((num&0x00f)<<5)
   num = ((num&0x18c)>>2)|(num&0x010)|((num&0x063)<<2)
@@ -858,7 +731,7 @@ end
 
 \secret{
 To complete the other methods of `bit_reverse` we can use the following implementations:
-```julia:./code/code16.jl
+```julia
 bit_reverse(::Val{31}, num) = begin
 bit_reverse(Val(15), num&0x7fff0000>>16)| (num&0x00008000) |(bit_reverse(Val(7),num&0x00007fff)<<16)
 end
@@ -869,7 +742,7 @@ bit_reverse(::Val{7}, num) = bit_reverse(Val(3), (num&0x70)>>4 )| (num&0x08) |(b
 
 To take into account the specificities of the representation of the complexes we use, we implement a new version of `reverse_bit_order`.
 
-```julia:./code/code17.jl
+```julia
 function reverse_bit_order_double!(x, order)
   N = length(x)
   for i in 0:(N÷2-1)
@@ -888,7 +761,7 @@ end
 This leads to the new FFT implementation.
 
 
-```julia:./code/code18.jl
+```julia
 function my_fft_3(x)
   N = length(x) ÷ 2
   order = Int(log2(N))
@@ -947,15 +820,37 @@ end
 
 We can now check the performance of the new implementation:
 
-```julia:./code/code181.jl
+```julia
 @benchmark fft!(x) setup=(x = rand(1024) .|> complex)
 ```
-\show{./code/code181.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  16.628 μs … 455.827 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     18.664 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   19.799 μs ±   5.338 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-```julia:./code/code19.jl
+      ▃██▅▁ ▂▂
+  ▁▁▂▃█████▆██▆▃▃▃▂▂▂▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▂▂▁▁▁▁▂▂▂▂▁▁▁▂▂▂▁▁▁▁▁▁▁▁▁ ▂
+  16.6 μs         Histogram: frequency by time         29.3 μs <
+
+ Memory estimate: 304 bytes, allocs estimate: 4.
+```
+
+```julia
 @benchmark my_fft_3(x) setup=(x = rand(1024))
 ```
-\show{./code/code19.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  29.024 μs … 129.484 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     33.435 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   34.648 μs ±   5.990 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+   ▅ █  ▁      ▅
+  ▁█▁█▄▁█▄▂▇█▂▁█▄▂▁▄▂▁▁▃▁▁▁▁▃▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
+  29 μs           Histogram: frequency by time         59.8 μs <
+
+ Memory estimate: 0 bytes, allocs estimate: 0.
+```
 
 This is a very good result!
 
@@ -991,7 +886,7 @@ And with $\sin x = \cos(x-\frac{\pi}{2})$, we have directly the second formula.
 This relation is also interesting in terms of numerical stability. We can directly implement a final version of our FFT using these relations.
 
 
-```julia:./code/code20.jl
+```julia
 function my_fft_4(x)
   N = length(x) ÷ 2
   order = Int(log2(N))
@@ -1066,25 +961,49 @@ end
 
 We can check that we always get the right result: 
 
-```julia:./code/code21.jl
+```julia
 a = rand(1024)
 b = fft(a)
 c = my_fft_4(a)
 real.(b[1:end÷2]) ≈ c[1:2:end] && imag.(b[1:end÷2]) ≈ c[2:2:end]
 ```
-\show{./code/code21.jl}
+```
+true
+```
 
 In terms of performance, we finally managed to outperform the reference implementation!
 
-```julia:./code/code22.jl
+```julia
 @benchmark fft!(x) setup=(x = rand(1024) .|> complex)
 ```
-\show{./code/code22.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  16.991 μs … 660.685 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     19.090 μs               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   20.367 μs ±   7.360 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+     ▁▂▁▂▇█▃
+  ▃▆████████▆▅▅▄▄▄▄▃▃▄▄▃▃▃▃▂▃▃▃▃▂▂▃▃▂▂▂▃▃▃▃▃▃▂▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▂ ▃
+  17 μs           Histogram: frequency by time         31.9 μs <
+
+ Memory estimate: 304 bytes, allocs estimate: 4.
+```
 
 ```julia:./code/code23.jl
 @benchmark my_fft_4(x) setup=(x = rand(1024))
 ```
-\show{./code/code23.jl}
+```
+BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range (min … max):  12.025 μs … 77.621 μs  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     12.654 μs              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   13.781 μs ±  2.731 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+  █ █▂▃▅ ▅▃ ▅▁ ▂▃  ▄  ▁▃▁ ▁▄▂ ▂ ▄▂                            ▂
+  █▇████▅██▁██▃██▃▆██▆███▇███▄████▄▄▁▃▄▄▅▄▁▄▄▅▃▁▄▄▃▄▄▃▄▄▄▄▁▄▅ █
+  12 μs        Histogram: log(frequency) by time      25.4 μs <
+
+ Memory estimate: 0 bytes, allocs estimate: 0.
+```
 
 
 [^power2]: In practice we can always reduce to this case by stuffing zeros.
@@ -1095,149 +1014,6 @@ In terms of performance, we finally managed to outperform the reference implemen
 
 If we compare the different implementations proposed in this tutorial as well as the two reference implementations, and then plot the median values of execution time, memory footprint and number of allocations, we obtain the following plot:
 
-```julia:./benchmark.jl
-#hideall
-# function benchmark_all_methods(l)
-# 	bench_naive = try
-# 		 @benchmark naive_dft(a) setup=(a = rand($l))
-# 	catch e
-#     @warn "Failed for naive" l
-# 		nothing
-# 	end
-# 	bench_fft = try
-# 		 @benchmark fft(a) setup=(a = rand($l))
-# 	catch e
-#     @warn "Failed for fft" l
-# 		nothing
-# 	end
-# 	bench_fft! = try
-# 		@benchmark fft!(a) setup=(a = rand($l) .|> complex)
-# 	catch e
-#     @warn "Failed for fft!" l
-# 		nothing
-# 	end
-# 	bench_my_fft = try
-# 		@benchmark my_fft(a) setup=(a = rand($l))
-# 	catch e
-#     @warn "Failed for my_fft" l
-# 		nothing
-# 	end
-# 	bench_my_fft_2 = try
-# 		@benchmark my_fft_2(a) setup=(a = rand($l) .|> complex)
-# 	catch e
-#     @warn "Failed for my_fft_2" l
-# 		nothing
-# 	end
-# 	bench_my_fft_3 = try
-# 		@benchmark my_fft_3(x) setup=(x = rand($l))
-# 	catch e
-#     @warn "Failed for my_fft_3" l
-# 		nothing
-# 	end
-# 	bench_my_fft_4 = try
-# 		@benchmark my_fft_4(x) setup=(x = rand($l))
-# 	catch e
-#     @warn "Failed for my_fft_4" l
-# 		nothing
-# 	end
-#   bench_rfft = try
-# 		@benchmark rfft(x) setup=(x = rand($l))
-# 	catch e
-#     @warn "Failed for rfft" l
-# 		nothing
-# 	end
-# 	
-# 	bench_naive, bench_fft, bench_fft!, bench_rfft, bench_my_fft, bench_my_fft_2,
-#   bench_my_fft_3, bench_my_fft_4
-# end
-# 
-# benchmark_lengths = 2 .^ [2, 4, 8, 9, 10, 16]
-# benchmarks = benchmark_all_methods.(benchmark_lengths)
-# Base.minimum(::Nothing) = nothing
-# import Statistics
-# Statistics.median(::Nothing) = nothing
-# median_times = vcat(map(x->reshape([if isnothing(a) missing else a.time end for
-# a in x], 1, :), map(x->median.(x), benchmarks))...);
-# median_memory = vcat(map(x->reshape([if isnothing(a) missing else a.memory end
-# for a in x], 1, :), map(x->median.(x), benchmarks))...);
-# median_allocs = vcat(map(x->reshape([if isnothing(a) missing else a.allocs end
-# for a in x], 1, :), map(x->median.(x), benchmarks))...);
-```
-
-```julia:./benchmark_plot.jl
-#hideall
-# fig = Figure(resolution=(900,800))
-# 
-# theme_benchmark = Theme(
-#   Axis=(
-#     xgridvisible=true,
-#     ygridvisible=true,
-#     yminorticksvisible=true,
-#     xminorticksvisible=true,
-#     yminorgridvisible=true,
-#     xminorgridvisible=true,
-#     yticksvisible=true,
-#     yticklabelsvisible=true,
-#     ylabelsize=20,
-#     xlabelsize=20,
-#     xminorticks = IntervalsBetween(5),
-#     yminorticks = IntervalsBetween(10),
-#     xticklabelssize=18,
-#     yticklabelsssize=18,
-#   ),
-#   ScatterLines=(
-#     markersize=24,
-#   )
-# )
-# 
-# set_theme!(theme_benchmark)
-# ax_time = Axis(
-#   fig[1,1],
-#   xlabel="Input array size",
-#   ylabel="Execution time (ns)",
-# )
-# ax_memory = Axis(
-#   fig[2,1],
-#   xlabel="Input array size",
-#   ylabel="Memory estimate (bytes)",
-#   limits=(nothing, nothing, 1/2, nothing),
-# )
-# ax_alloc = Axis(
-#   fig[3,1],
-#   xlabel="Input array size",
-#   ylabel="Allocs estimate",
-#   limits=(nothing, nothing, 1/2, nothing),
-# )
-# linkxaxes!(ax_time, ax_alloc)
-# linkxaxes!(ax_time, ax_memory)
-# 
-# colors=[Makie.wong_colors(); :black]
-# markers=[:circle, :utriangle, :dtriangle, :ltriangle, :star4, :rect, :diamond, :star5]
-# labels = ["Naive DFT", "FFTW.fft", "FFTW.fft!", "FFTW.rfft", "my_fft", "my_fft_2", "my_fft_3", "my_fft_4"]
-# 
-# for i in 1:length(labels)
-#   scatterlines!(ax_time, benchmark_lengths, max.(median_times[:,i], 1e-20),
-#   marker=markers[i], color=colors[i])
-#   scatterlines!(ax_memory, benchmark_lengths, max.(median_memory[:,i], 1/2),
-#   marker=markers[i], color=colors[i])
-#   scatterlines!(ax_alloc, benchmark_lengths, max.(median_allocs[:,i], 1/2),
-#   marker=markers[i], color=colors[i], label=labels[i])
-# end
-# 
-# 
-# ax_time.xscale[] = log2
-# ax_memory.xscale[] = log2
-# ax_alloc.xscale[] = log2
-# ax_time.yscale[] = log10
-# ax_memory.yscale[] = log2
-# ax_alloc.yscale[] = log2
-# 
-# 
-# Legend(fig[:,2], ax_alloc, tellwidth=true, tellheight=false)
-# set_theme!()
-# 
-# save(joinpath(@OUTPUT, "benchmark.svg"), current_figure())
-```
 
 \figure{Benchmark of the different solutions: median
 values.}{./benchmark.svg}
@@ -1253,14 +1029,16 @@ How can we explain these differences, especially between our latest implementati
    power of two. And even then, only those for which we have taken the trouble
    to implement a method of the `bit_reverse` function. The reverse bit permutation problem is a bit more complicated to solve in the general case. Moreover FFTW performs well on many types of architectures, offers discrete Fourier transforms in multiple dimensions etc... If you are interested in the subject, I recommend [this article](https://www.researchgate.net/publication/2986439_The_Design_and_implementation_of_FFTW3)[^fftw] which presents the internal workings of FFTW.
 2. The representation of the complex numbers plays in our favor. Indeed, we avoid our implementation to do any conversion, this is seen in particular in the test codes where we take care of recovering the real part and the imaginary part of the transform:
-```julia:./code/code24.jl
+```julia
 real.(b[1:end÷2]) ≈ c[1:2:end] && imag.(b[1:end÷2]) ≈ c[2:2:end]
 ```
-\show{./code/code24.jl}
+```
+true
+```
 3. Our algorithm was not thought of with numerical stability in mind. This is an aspect that could still be improved. Also, we did not test it on anything other than noise. However, the following block presents some tests that suggest that it "behaves well" for some test functions.
 
 \secret{
-```julia:./code/code25.jl
+```julia
 function test_signal(s)
 b = fft(s)
 c = my_fft_4(s)
@@ -1272,14 +1050,18 @@ y = @. exp(-t^2)
 noise = rand(1024)
 test_signal(y .+ noise)
 ```
-\show{./code/code25.jl}
-```julia:./code/code26.jl
+```
+true
+```
+```julia
 t = range(-10, 10; length=1024)
 y = @. sin(t)
 noise = rand(1024)
 test_signal(y .+ noise)
 ```
-\show{./code/code26.jl}
+```
+true
+```
 }
 
 These simplifications and special cases allow our implementation to gain a lot
@@ -1309,7 +1091,3 @@ Finally, I want to thank @Gawaboumga, @Næ, @zeqL and @luxera for their feedback
 on the beta of this tutorial, and @Gabbro for the validation on
 [zestedesavoir.com](https://zestedesavoir.com)!
 
-```julia:./code/goodbye.jl
-#hideall
-Pkg.activate(".")
-```
