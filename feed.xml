@@ -439,7 +439,7 @@ read&#33;&#40;sp, data&#41;</code></pre>
 <p>Rather than endlessly optimizing the floating-point implementation, I decided to change my approach. The main motivation being: <strong>Floats are actually overkill for our purpose</strong>. Indeed, they have the ability to represent numbers with a good relative precision over enormous ranges. However, when calculating FFTs the range output variables may cover can indeed vary, but not that much. And most importantly, it varies <strong>predictably</strong>. This means a <strong>fixed-point</strong> representation can be used. Also, because of their amazing properties Floats actually take a lot of space in the limited RAM available on a microcontroller. And finally, I want to be able to run FFTs on signal read from Arduino&#39;s ADC. If my program can deal with <code>int</code>-like data types, then it&#39;ll spare me the trouble of converting from integers to floating-points.</p>
 <h2 id="fixed-point_multiplication">Fixed-point multiplication.</h2>
 <p>I first played with the idea of implementing a fixed-point FFT because I realized the <a href="http://ww1.microchip.com/downloads/en/devicedoc/atmel-0856-avr-instruction-set-manual.pdf#_OPENTOPIC_TOC_PROCESSING_d94e3581">AVR instruction set</a> gives us the <code>fmul</code> instruction, dedicated to multiplying fixed-point numbers. This means we can use it to have a speed-efficient implementation of the multiplication, that should even beat the custom <code>float</code> one.</p>
-<p>I wrote a <a href="https://zestedesavoir.com/contenus/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/">blog-post</a> on Zeste-de-Savoir &#40;in French&#41; on implementing the fixed-point multiplication. It is based on the proposed implementation in the AVR instruction set manual.</p>
+<p>I wrote a <a href="https://zestedesavoir.com/billets/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/">blog-post</a> on Zeste-de-Savoir &#40;in French&#41; on implementing the fixed-point multiplication. It is based on the proposed implementation in the AVR instruction set manual.</p>
 <pre><code class="language-cpp">/* Signed fractional multiply of two 16-bit numbers with 32-bit result. */
 fixed_t fixed_mul&#40;fixed_t a, fixed_t b&#41; &#123;
   fixed_t result;
@@ -448,9 +448,6 @@ fixed_t fixed_mul&#40;fixed_t a, fixed_t b&#41; &#123;
       &quot;clr r2&quot; &quot;\n\t&quot;
       &quot;fmuls &#37;B&#91;a&#93;,&#37;B&#91;b&#93;&quot; &quot;\n\t&quot; // Multiply the MSBs
       &quot;movw &#37;A&#91;result&#93;,__tmp_reg__&quot; &quot;\n\t&quot; // Save the result
-      &quot;mov __tmp_reg__,&#37;B&#91;a&#93;&quot; &quot;\n\t&quot;
-      &quot;eor __tmp_reg__,&#37;B&#91;b&#93;&quot; &quot;\n\t&quot;
-      &quot;eor __tmp_reg__,&#37;B&#91;result&#93;&quot; &quot;\n\t&quot;
       &quot;fmul &#37;A&#91;a&#93;,&#37;A&#91;b&#93;&quot; &quot;\n\t&quot; // Multiply the LSBs
       &quot;adc &#37;A&#91;result&#93;,r2&quot; &quot;\n\t&quot; // Do not forget the carry
       &quot;movw r18,__tmp_reg__&quot; &quot;\n\t&quot; // The result of the LSBs multipliplication is stored in temporary registers
@@ -799,6 +796,21 @@ fixed_t fixed_add_saturate&#40;fixed_t a, fixed_t b&#41; &#123;
 <div class="message-body">
   This content was originally publisher on <a href="https://zestedesavoir.com">zestedesavoir.com</a> in French. This is a quick translation &#40;using Deepl and a few manual modifications&#41;. If something seems off please tell me, as it is likely an error coming from the translation step. You can even <a href="https://github.com/Klafyvel/klafypage/issues/new/choose">open an issue</a> on Github, or <a href="https://github.com/Klafyvel/klafypage/compare">create a pull-request</a> to fix the issue &#33; 
 </div>
+</div>
+<div class="message  is-info">
+<div class="message-header">
+<p> Information</p>
+</div>
+<div class="message-body">
+  This page used to be generated dynamically, but the benchmarks would break every so often because of that. It is now generated statically. The current page was generated with the following julia setup:</p>
+<pre><code class="language-julia-repl">pkg&gt; st
+Status &#96;/tmp/jl_AEhNcq/Project.toml&#96;
+  &#91;6e4b80f9&#93; BenchmarkTools v1.5.0
+  &#91;13f3f980&#93; CairoMakie v0.12.4
+  &#91;7a1cc6ca&#93; FFTW v1.8.0
+  &#91;65edfddc&#93; SixelTerm v1.3.0</code></pre>
+<p>On my personnal computer &#40;Intel&#40;R&#41; Core&#40;TM&#41; i7-6600U CPU @ 2.60GHz&#41;. The full code for this article is available <a href="https://klafyvel.me/blog/articles/fft-julia/code.jl">here</a>. 
+</div>
 </div><p><table class="fndef" id="fndef:numerical">
     <tr>
         <td class="fndef-backref">[1]</td>
@@ -829,7 +841,7 @@ fixed_t fixed_add_saturate&#40;fixed_t a, fixed_t b&#41; &#123;
 </li>
 </ol>
 <p>I suggest you to reason on a toy signal which will have the shape of a Gaussian. This makes the reasoning a little simpler because the Fourier transform of a real Gaussian is also a real Gaussian<sup id="fnref:gaussian">[2]</sup>, which simplifies the graphical representations. </p><figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/signal.svg" alt="The signal which will be used as an example"> 
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/signal.svg" alt="The signal which will be used as an example"> 
 <figcaption> The signal which will be used as an example</figcaption>
 </figure><p>More formally, we have:</p>
 \[
@@ -839,9 +851,8 @@ f(x) = e^{-x^2},\;\hat{f}(\nu)=\sqrt{\pi}e^{-(\pi\nu)^2}
 \[
 ш_T(x) = \sum_{k=-\infty}^{+\infty}\delta(x-kT)
 \]
-<p>With \(\delta\) the <a href="https://fr.wikipedia.org/wiki/Distribution_de_Dirac">Dirac distribution</a>. Here is the plot that we can obtain if we represent \(f\) and \(g=ш_T\times f\) together:</p>
-<figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech.svg" alt="The signal and the sampled signal."> 
+<p>With \(\delta\) the <a href="https://fr.wikipedia.org/wiki/Distribution_de_Dirac">Dirac distribution</a>. Here is the plot that we can obtain if we represent \(f\) and \(g=ш_T\times f\) together:</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/signal_ech.svg" alt="The signal and the sampled signal."> 
 <figcaption> The signal and the sampled signal.</figcaption>
 </figure><p>The Fourier transform of the new \(g\) function is written <sup id="fnref:math">[3]</sup> :</p>
 \[
@@ -857,21 +868,18 @@ x \nu}\text{d}x \\
 \[
 \hat{g} = \sum_{k=-\infty}^{+\infty}f[k]e^{-2i\pi k\frac{\nu}{\nu_{\text{ech}}}}
 \]
-<p>If we plot the Fourier transform of the starting signal \(\hat{f}\) and that of the sampled signal \(\hat{g}\), we obtain the following plot:</p>
-<figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/tf_signal_ech.svg" alt="Fourier transform of the signal and its sampled
-signal"> 
-<figcaption> Fourier transform of the signal and its sampled
-signal</figcaption>
+<p>If we plot the Fourier transform of the starting signal \(\hat{f}\) and that of the sampled signal \(\hat{g}\), we obtain the following plot:</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/tf_signal_ech.svg" alt="Fourier transform of the signal and its sampled signal"> 
+<figcaption> Fourier transform of the signal and its sampled signal</figcaption>
 </figure>
 <div class="message  is-info">
 <div class="message-header">
 <p> Information</p>
 </div>
 <div class="message-body">
-  We notice that the sampling of the signal has led to the periodization of its Fourier transform. This leads to an important property in signal processing: the <a href="https://en.wikipedia.org/wiki/Nyquist&#37;E2&#37;80&#37;93Shannon_sampling_theorem">Nyquist-Shanon criterion</a>, and one of its consequences, spectrum aliasing. I let you consult the Wikipedia article about this if you are interested, but you can have a quick idea of what happens if you draw the previous plot with a too large sampling: the bells of the sampled signal transform overlap.</p><p>
+  We notice that the sampling of the signal has led to the periodization of its Fourier transform. This leads to an important property in signal processing: the <a href="https://en.wikipedia.org/wiki/Nyquist&#37;E2&#37;80&#37;93Shannon_sampling_theorem">Nyquist-Shanon criterion</a>, and one of its consequences, spectrum aliasing. I let you consult the Wikipedia article about this if you are interested, but you can have a quick idea of what happens if you draw the previous plot with a too large sampling: the bells of the sampled signal transform overlap. 
 <figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/tf_signal_ech_aliasing.svg" alt="Fourier transform of the signal and its sampled signal, illustrating
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/tf_signal_ech_aliasing.svg" alt="Fourier transform of the signal and its sampled signal, illustrating
 aliasing."> 
 <figcaption> Fourier transform of the signal and its sampled signal, illustrating
 aliasing.</figcaption>
@@ -885,9 +893,8 @@ aliasing.</figcaption>
 0 & \;\text{else}
 \end{aligned} 
 \]
-<p>Graphically, here is how we could represent \(h\) and \(f\) together.</p>
-<figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech_fen.svg" alt="Signal sampled and windowed"> 
+<p>Graphically, here is how we could represent \(h\) and \(f\) together.</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/signal_ech_fen.svg" alt="Signal sampled and windowed"> 
 <figcaption> Signal sampled and windowed</figcaption>
 </figure><p>Concretely, this is equivalent to limiting the sum of the Dirac comb to a finite number of terms. We can then write the Fourier transform of \(h=Pi_{x_0} \times ш_T \times f\) :</p>
 \[
@@ -913,9 +920,8 @@ aliasing.</figcaption>
 &=& \sum_{k=0}^{N-1}f[k]e^{-2i\pi k\frac{n}{N}}
 \end{aligned}
 \]
-<p>To get the last line, I re-indexed \(f[k]\) to start at 0, noting \(N\) the number of samples. I then assumed that the window size corresponded to an integer number of samples, i.e. that \(2x_0 = N\times T\), which is rewritten as \(N\times \nu_s = \nu_{\text{ech}}\). This expression is the <strong>discrete Fourier transform</strong> of the signal.</p>
-<figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech_fen_ech.svg" alt="Sampling the Fourier transform of the sampled signal to obtain the
+<p>To get the last line, I re-indexed \(f[k]\) to start at 0, noting \(N\) the number of samples. I then assumed that the window size corresponded to an integer number of samples, i.e. that \(2x_0 = N\times T\), which is rewritten as \(N\times \nu_s = \nu_{\text{ech}}\). This expression is the <strong>discrete Fourier transform</strong> of the signal.</p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/signal_ech_fen_ech.svg" alt="Sampling the Fourier transform of the sampled signal to obtain the
 discrete Fourier transform"> 
 <figcaption> Sampling the Fourier transform of the sampled signal to obtain the
 discrete Fourier transform</figcaption>
@@ -941,9 +947,8 @@ discrete Fourier transform</figcaption>
 \forall n=0...(N-1),\; \hat{f}[n] = \sum_{k=0}^{N-1}f[k]e^{-2i\pi k\frac{n}{N}}
 }
 \]
-<p>To conclude on our example function, we obtain the following plot: </p>
-<figure style="text-align=center;">
- <img src="https://klafyvel.me/assets/blog/articles/fft-julia/output/signal_ech_fen_ech_fen.svg" alt="Windowing of the discrete Fourier transform for
+<p>To conclude on our example function, we obtain the following plot: </p><figure style="text-align=center;">
+ <img src="https://klafyvel.me/assets/blog/articles/fft-julia/signal_ech_fen_ech_fen.svg" alt="Windowing of the discrete Fourier transform for
 storage"> 
 <figcaption> Windowing of the discrete Fourier transform for
 storage</figcaption>
@@ -999,23 +1004,26 @@ b ≈ c</code></pre>
 </div><p>However, is this code effective? We can check by comparing the memory footprint and execution speed.</p>
 <pre><code class="language-julia">using BenchmarkTools</code></pre>
 <pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  18.290 μs … 333.143 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     44.453 μs               ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   47.263 μs ±  12.066 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;                  ▁▇▆█▁▄
+  ▂▂▁▁▂▂▁▁▂▂▁▂▁▁▃▆███████▆▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂ ▃
+  18.3 μs         Histogram: frequency by time         98.7 μs &lt; Memory estimate: 32.55 KiB, allocs estimate: 6.</code></pre>
 <pre><code class="language-julia">@benchmark naive_dft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<p><pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre> 
-<div class="message  is-info">
+<pre><code class="language-julia">BenchmarkTools.Trial: 100 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  35.577 ms … 571.900 ms  ┊ GC &#40;min … max&#41;:  0.00&#37; … 88.11&#37;
+ Time  &#40;median&#41;:     40.820 ms               ┊ GC &#40;median&#41;:     0.00&#37;
+ Time  &#40;mean ± σ&#41;:   50.326 ms ±  53.354 ms  ┊ GC &#40;mean ± σ&#41;:  11.18&#37; ± 10.10&#37;    ▂█
+  ▅▅██▅▆▆▅▄▄▁▄▁▁▁▄▁▁▄▁▅█▄▆▄▃▃▄▅▅▁▃▁▁▁▁▁▁▃▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▃ ▃
+  35.6 ms         Histogram: frequency by time         80.2 ms &lt; Memory estimate: 16.03 MiB, allocs estimate: 4.</code></pre><div class="message  is-info">
 <div class="message-header">
 <p> Information</p>
 </div>
 <div class="message-body">
   As you can see, the maximum execution time of the reference implementation is two orders of magnitude higher than the average and median execution time. This is due to Julia&#39;s <em>Just in time</em> &#40;JIT&#41; compilation. If we were writing a real Julia library we could consider optimizing our code to compile quickly. We will just ignore the maximum execution time in this tutorial, which is only the compilation time for the first execution of the code. I refer you to <a href="https://juliaci.github.io/BenchmarkTools.jl/dev/">the <code>BenchmarkTools.jl</code> documentation</a> for more information. 
 </div>
-</div>
-</p>
-<p>So our implementation is <em>really</em> slow &#40;about 10,000 times&#41; and has a very high memory footprint &#40;about 500 times&#41; compared to the benchmark implementation&#33; To improve this, we will implement the fast Fourier transform.</p>
+</div><p>So our implementation is <em>really</em> slow &#40;about 10,000 times&#41; and has a very high memory footprint &#40;about 500 times&#41; compared to the benchmark implementation&#33; To improve this, we will implement the fast Fourier transform.</p>
 <h2 id="why_a_fast_fourier_transform_algorithm">Why a fast Fourier transform algorithm?</h2>
 <p>Before getting our hands dirty again, let&#39;s first ask the question: is it really necessary to try to improve this algorithm?</p>
 <p>Before answering directly, let us look at some applications of the Fourier transform and the discrete Fourier transform.</p>
@@ -1081,13 +1089,19 @@ n/N}\sum_{m=0}^{N/2-1}f[2m+1]e^{-2i\pi m\frac{n}{N/2}}\\
 end</code></pre>
 <p>We can check as before that code gives a fair result, then compare its runtime qualities with the reference implementation.</p>
 <pre><code class="language-julia">@benchmark fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  15.262 μs … 67.122 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     16.877 μs              ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   18.290 μs ±  3.125 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;     ▇█▂
+  ▁▂▇███▆▄▄▄▃▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
+  15.3 μs         Histogram: frequency by time        27.9 μs &lt; Memory estimate: 32.55 KiB, allocs estimate: 6.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 3399 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  983.141 μs … 586.032 ms  ┊ GC &#40;min … max&#41;:  0.00&#37; … 99.48&#37;
+ Time  &#40;median&#41;:       1.113 ms               ┊ GC &#40;median&#41;:     0.00&#37;
+ Time  &#40;mean ± σ&#41;:     1.464 ms ±  10.067 ms  ┊ GC &#40;mean ± σ&#41;:  17.52&#37; ±  9.04&#37;  ██▅▂▁▄▂▁▂▁                                                    ▁
+  ████████████▇▄▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▃▄▅ █
+  983 μs        Histogram: log&#40;frequency&#41; by time       7.58 ms &lt; Memory estimate: 989.12 KiB, allocs estimate: 10230.</code></pre>
 <p>We can see that we have improved the execution time &#40;by a factor of 8&#41; and the memory footprint of the algorithm &#40;by a factor of 13&#41;, without getting closer to the reference implementation.</p>
 <h2 id="analysis_of_the_first_implementation">Analysis of the first implementation</h2>
 <p>Let&#39;s go back to the previous code: </p>
@@ -1189,13 +1203,19 @@ end</code></pre><div class="message  is-info">
 </div>
 </div><p>We can again measure the performance of this implementation. To keep the comparison fair, the <code>fft&#33;</code> function should be used instead of <code>fft</code>, as it works in place.</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; |&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  16.501 μs … 156.742 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     20.942 μs               ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   24.874 μs ±   8.820 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;    █▇▁
+  ▂▇████▅▄▄▄▃▂▅▄▂▃▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▃▃▃▃▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
+  16.5 μs         Histogram: frequency by time           52 μs &lt; Memory estimate: 304 bytes, allocs estimate: 4.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_2&#40;a&#41; setup&#61;&#40;a &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  46.957 μs … 152.061 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     50.283 μs               ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   55.079 μs ±  10.720 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;   ▅ █▃▁▆▂ ▄  ▃  ▂   ▁    ▂    ▁    ▁                          ▁
+  ██▇██████████████▇▇█▇▇▇▇█▇▆▆██▅▅▅▆█▆▆▆▇▇██▇▇█▇▆▆▆▇▅▇▅▅▆▅▅▅▅▆ █
+  47 μs         Histogram: log&#40;frequency&#41; by time      98.7 μs &lt; Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>We have significantly improved our execution time and memory footprint. We can see that there are zero bytes allocated &#40;this means that the compiler does not need to store the few intermediate variables in RAM&#41;, and that the execution time is close to that of the reference implementation.</p>
 <h2 id="the_special_case_of_a_real_signal">The special case of a real signal</h2>
 <p>So far we have reasoned about complex signals, which use two floats for storage. However in many situations we work with real value signals. Now in the case of a real signal, we know that \(\hat{f}\) verifies \(\hat{f}(-\nu) = \overline{\hat{f}(\nu)}\). This means that half of the values we calculate are redundant. Although we calculate the Fourier transform of a real signal, the result can be a complex number. In order to save storage space, we can think of using this half of the array to store complex numbers. For this, two properties will help us.</p>
@@ -1376,13 +1396,19 @@ end</code></pre>
 end</code></pre>
 <p>We can now check the performance of the new implementation:</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  16.628 μs … 455.827 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     18.664 μs               ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   19.799 μs ±   5.338 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;      ▃██▅▁ ▂▂
+  ▁▁▂▃█████▆██▆▃▃▃▂▂▂▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▂▂▁▁▁▁▂▂▂▂▁▁▁▂▂▂▁▁▁▁▁▁▁▁▁ ▂
+  16.6 μs         Histogram: frequency by time         29.3 μs &lt; Memory estimate: 304 bytes, allocs estimate: 4.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_3&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  29.024 μs … 129.484 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     33.435 μs               ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   34.648 μs ±   5.990 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;   ▅ █  ▁      ▅
+  ▁█▁█▄▁█▄▂▇█▂▁█▄▂▁▄▂▁▁▃▁▁▁▁▃▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ ▂
+  29 μs           Histogram: frequency by time         59.8 μs &lt; Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>This is a very good result&#33;</p>
 <h2 id="optimization_of_trigonometric_functions">Optimization of trigonometric functions</h2>
 <p>If we analyze the execution of <code>my_fft_3</code> using Julia&#39;s <em>profiler</em>, we can see that most of the time is spent computing trigonometric functions and creating the <code>StepRange</code> objects used in <code>for</code> loops. The second problem can be easily circumvented by using <code>while</code> loops. For the first one, in <em>Numerical Recipes</em> we can read &#40;section 5.4 &quot;<em>Recurrence Relations and Clenshaw&#39;s Recurrence Formula</em>&quot;, page 219 of the third edition&#41;:</p>
@@ -1484,17 +1510,22 @@ end</code></pre>
 b &#61; fft&#40;a&#41;
 c &#61; my_fft_4&#40;a&#41;
 real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;</code></pre>
-<pre><code class="plaintext code-output">UndefVarError: `fft` not defined
-</code></pre>
+<pre><code class="language-julia">true</code></pre>
 <p>In terms of performance, we finally managed to outperform the reference implementation&#33;</p>
 <pre><code class="language-julia">@benchmark fft&#33;&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41; .|&gt; complex&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  16.991 μs … 660.685 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     19.090 μs               ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   20.367 μs ±   7.360 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;     ▁▂▁▂▇█▃
+  ▃▆████████▆▅▅▄▄▄▄▃▃▄▄▃▃▃▃▂▃▃▃▃▂▂▃▃▂▂▂▃▃▃▃▃▃▂▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▂ ▃
+  17 μs           Histogram: frequency by time         31.9 μs &lt; Memory estimate: 304 bytes, allocs estimate: 4.</code></pre>
 <pre><code class="language-julia">@benchmark my_fft_4&#40;x&#41; setup&#61;&#40;x &#61; rand&#40;1024&#41;&#41;</code></pre>
-<pre><code class="plaintext code-output">LoadError: UndefVarError: `@benchmark` not defined
-in expression starting at none:1
-</code></pre>
+<pre><code class="language-julia">BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+ Range &#40;min … max&#41;:  12.025 μs … 77.621 μs  ┊ GC &#40;min … max&#41;: 0.00&#37; … 0.00&#37;
+ Time  &#40;median&#41;:     12.654 μs              ┊ GC &#40;median&#41;:    0.00&#37;
+ Time  &#40;mean ± σ&#41;:   13.781 μs ±  2.731 μs  ┊ GC &#40;mean ± σ&#41;:  0.00&#37; ± 0.00&#37;  █ █▂▃▅ ▅▃ ▅▁ ▂▃  ▄  ▁▃▁ ▁▄▂ ▂ ▄▂                            ▂
+  █▇████▅██▁██▃██▃▆██▆███▇███▄████▄▄▁▃▄▄▅▄▁▄▄▅▃▁▄▄▃▄▄▃▄▄▄▄▁▄▅ █
+  12 μs        Histogram: log&#40;frequency&#41; by time      25.4 μs &lt; Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p><table class="fndef" id="fndef:power2">
     <tr>
         <td class="fndef-backref">[4]</td>
@@ -1524,8 +1555,7 @@ values.</figcaption>
 </li>
 </ol>
 <pre><code class="language-julia">real.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;1:2:end&#93; &amp;&amp; imag.&#40;b&#91;1:end÷2&#93;&#41; ≈ c&#91;2:2:end&#93;</code></pre>
-<pre><code class="plaintext code-output">UndefVarError: `b` not defined
-</code></pre>
+<pre><code class="language-julia">true</code></pre>
 <ol start="3">
 <li><p>Our algorithm was not thought of with numerical stability in mind. This is an aspect that could still be improved. Also, we did not test it on anything other than noise. However, the following block presents some tests that suggest that it &quot;behaves well&quot; for some test functions.</p>
 </li>
@@ -1543,14 +1573,13 @@ endt &#61; range&#40;-10, 10; length&#61;1024&#41;
 y &#61; @. exp&#40;-t^2&#41;
 noise &#61; rand&#40;1024&#41;
 test_signal&#40;y .&#43; noise&#41;</code></pre>
-<pre><code class="plaintext code-output">UndefVarError: `fft` not defined
-</code></pre>
+<pre><code class="language-julia">true</code></pre>
 <pre><code class="language-julia">t &#61; range&#40;-10, 10; length&#61;1024&#41;
 y &#61; @. sin&#40;t&#41;
 noise &#61; rand&#40;1024&#41;
 test_signal&#40;y .&#43; noise&#41;</code></pre>
-<p><pre><code class="plaintext code-output">UndefVarError: `fft` not defined
-</code></pre> 
+<pre><code class="language-julia">true</code></pre>
+<p>
 </div>
 </div><p>These simplifications and special cases allow our implementation to gain a lot in speed. This makes the implementation of FFTW all the more remarkable, as it still performs very well&#33;</p>
 <table class="fndef" id="fndef:fftw">
@@ -1562,7 +1591,8 @@ test_signal&#40;y .&#43; noise&#41;</code></pre>
 <p>At the end of this tutorial I hope to have helped you to understand the mechanisms that make the FFT computation work, and to have shown how to implement it efficiently, modulo some simplifications. Personally, writing this tutorial has allowed me to realize the great qualities of FFTW, the reference implementation, that I use every day in my work&#33;</p>
 <p>This should allow you to understand that for some use cases, it can be interesting to implement and optimize your own FFT. An application that has been little discussed in this tutorial is the calculation of convolution products. An efficient method when convolving signals of comparable length is to do so by multiplying the two Fourier transforms and then taking the inverse Fourier transform. In this case, since the multiplication is done term by term, it is not necessary that the Fourier transform is ordered. One could therefore imagine a special implementation that would skip the reverse bit permutation part.</p>
 <p>Another improvement that could be made concerns the calculation of the inverse Fourier transform. It is a very similar calculation &#40;only the multiplicative coefficients change&#41;, and can be a good exercise to experiment with the codes given in this tutorial.</p>
-<p>Finally, I want to thank @Gawaboumga, @Næ, @zeqL and @luxera for their feedback on the beta of this tutorial, and @Gabbro for the validation on <a href="https://zestedesavoir.com">zestedesavoir.com</a>&#33;</p> ]]>
+<p>Finally, I want to thank @Gawaboumga, @Næ, @zeqL and @luxera for their feedback on the beta of this tutorial, and @Gabbro for the validation on <a href="https://zestedesavoir.com">zestedesavoir.com</a>&#33;</p>
+ ]]>
   </content:encoded>
     
   <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>  

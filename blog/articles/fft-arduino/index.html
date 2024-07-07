@@ -14,7 +14,7 @@
   <meta property="og:image" content="assets/bouletmaton.jpg">
   <meta property="twitter:image" content="assets/bouletmaton.jpg">
   <meta property="og:locale" content="en-us">
-  <meta property="og:updated_time" content="2024-02-08">
+  <meta property="og:updated_time" content="2024-07-07">
    <link rel="stylesheet" href="/libs/katex/katex.min.css">
      
    <link rel="stylesheet" href="/libs/highlight/github.min.css">
@@ -199,7 +199,7 @@ read!(sp, data)</code></pre>
 <p>Rather than endlessly optimizing the floating-point implementation, I decided to change my approach. The main motivation being: <strong>Floats are actually overkill for our purpose</strong>. Indeed, they have the ability to represent numbers with a good relative precision over enormous ranges. However, when calculating FFTs the range output variables may cover can indeed vary, but not that much. And most importantly, it varies <strong>predictably</strong>. This means a <strong>fixed-point</strong> representation can be used. Also, because of their amazing properties Floats actually take a lot of space in the limited RAM available on a microcontroller. And finally, I want to be able to run FFTs on signal read from Arduino&#39;s ADC. If my program can deal with <code>int</code>-like data types, then it&#39;ll spare me the trouble of converting from integers to floating-points.</p>
 <h2 id="fixed-point_multiplication"><a href="#fixed-point_multiplication" class="header-anchor">Fixed-point multiplication.</a></h2>
 <p>I first played with the idea of implementing a fixed-point FFT because I realized the <a href="http://ww1.microchip.com/downloads/en/devicedoc/atmel-0856-avr-instruction-set-manual.pdf#_OPENTOPIC_TOC_PROCESSING_d94e3581">AVR instruction set</a> gives us the <code>fmul</code> instruction, dedicated to multiplying fixed-point numbers. This means we can use it to have a speed-efficient implementation of the multiplication, that should even beat the custom <code>float</code> one.</p>
-<p>I wrote a <a href="https://zestedesavoir.com/contenus/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/">blog-post</a> on Zeste-de-Savoir &#40;in French&#41; on implementing the fixed-point multiplication. It is based on the proposed implementation in the AVR instruction set manual.</p>
+<p>I wrote a <a href="https://zestedesavoir.com/billets/4258/en-periode-de-canicule-une-idee-fixe-economiser-la-float/">blog-post</a> on Zeste-de-Savoir &#40;in French&#41; on implementing the fixed-point multiplication. It is based on the proposed implementation in the AVR instruction set manual.</p>
 <pre><code class="cpp hljs"><span class="hljs-comment">/* Signed fractional multiply of two 16-bit numbers with 32-bit result. */</span>
 <span class="hljs-function"><span class="hljs-type">fixed_t</span> <span class="hljs-title">fixed_mul</span><span class="hljs-params">(<span class="hljs-type">fixed_t</span> a, <span class="hljs-type">fixed_t</span> b)</span> </span>{
   <span class="hljs-type">fixed_t</span> result;
@@ -208,9 +208,6 @@ read!(sp, data)</code></pre>
       <span class="hljs-string">&quot;clr r2&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span>
       <span class="hljs-string">&quot;fmuls %B[a],%B[b]&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// Multiply the MSBs</span>
       <span class="hljs-string">&quot;movw %A[result],__tmp_reg__&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// Save the result</span>
-      <span class="hljs-string">&quot;mov __tmp_reg__,%B[a]&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span>
-      <span class="hljs-string">&quot;eor __tmp_reg__,%B[b]&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span>
-      <span class="hljs-string">&quot;eor __tmp_reg__,%B[result]&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span>
       <span class="hljs-string">&quot;fmul %A[a],%A[b]&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// Multiply the LSBs</span>
       <span class="hljs-string">&quot;adc %A[result],r2&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// Do not forget the carry</span>
       <span class="hljs-string">&quot;movw r18,__tmp_reg__&quot;</span> <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// The result of the LSBs multipliplication is stored in temporary registers</span>
@@ -418,7 +415,7 @@ X[k] &amp;=&amp; \sum_{n=0}^{N-1}x[n]e^{-2i\pi nk/N}
   <script src="/libs/burger.js"></script> 
   <footer class="footer">
     <div class="content has-text-centered">
-      <p> By <a href="https://klafyvel.me/">Hugo Levy-Falk</a>. Last modified: February 08, 2024. 
+      <p> By <a href="https://klafyvel.me/">Hugo Levy-Falk</a>. Last modified: July 07, 2024. 
       </p>
       <p>In case you wan updates, here is an <a href="https://klafyvel.me/feed.xml"/>RSS feed</a> for my website.</p>
       <p>
