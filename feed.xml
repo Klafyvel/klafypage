@@ -23,6 +23,75 @@
 
 <item>
   <title>
+    <![CDATA[  Building a proper archiving method for my things, episode 1  ]]>
+  </title>
+  <link> https://klafyvel.me/blog/articles/archiving-1/index.html </link>
+  <guid> https://klafyvel.me/blog/articles/archiving-1/index.html </guid>
+  <description>
+    <![CDATA[  I&#39;m looking for a solution I like for archiving my things.  ]]>
+  </description>  
+  
+  <content:encoded>
+    <![CDATA[  <p>That&#39;s a topic I&#39;ve been wanting to dive in for a long time. As I&#39;m getting older, I start to have accumulated some amount of files accross, often salvaged from device to device, that are somewhat dear to me. In a way, I want to archive properly my things for the same reasons <a href="https://bookshelf.thequinn.fr/quinns-journaling-guide">this blogpost by my friend cookie</a> convinced me to start journaling: later in time, I want to be able to remember how things were for me.</p>
+<h1 id="where_do_i_start_from">Where do I start from?</h1>
+<p>I&#39;ve got data scattered among multiple devices:</p>
+<ul>
+<li><p>My laptop &#39;ewilan&#39;,</p>
+</li>
+<li><p>My two external hard-drives, &#39;shae&#39; and, uh it does not have a name except &#39;TOSHIBA&#39;,</p>
+</li>
+<li><p>My server &#39;klafyvel.me&#39;, that has some various backups and hosts my emails,</p>
+</li>
+<li><p>My phone &#40;an android&#41;,</p>
+</li>
+<li><p>Some old broken android phone where I have pictures I&#39;d like to salvage someday,</p>
+</li>
+<li><p>an iPad I won at a hackathon that I do not use a lot, but still.</p>
+</li>
+</ul>
+<p>Most of the things are on ewilan and the two hard drives, and those are what I&#39;ll focus on first. </p>
+<h1 id="merging_the_two_drives">Merging the two drives</h1>
+<p>Because of the limited available disk space on my laptop, I&#39;ve been chaotically moving stuff to those drives. In principle, things should be duplicated on these two... but I&#39;ve been doing it by hand, and it&#39;s a mess. I&#39;ve been doing some cleanup on the TOSHIBA hard drive, because I use it less than shae, and removed as many things I could &#40;movies I&#39;d already watched, useless old projects...&#41;.</p>
+<p>Next, I needed to actually decide what to do with the remaining file: copying them if they were not already on shae, ignoring them otherwise. I am sure there are plenty of smart Linux commands to do that, but I&#39;m dumb and lazy, so I wrote <a href="">a Julia script</a> to do it the way I want. Essentially: </p>
+<ul>
+<li><p>it copies a file if the corresponding file does not exist on the target,</p>
+</li>
+<li><p>it does not copy a file whose path already exists on the target, but whose content is identical</p>
+</li>
+<li><p>it copies to a renamed path files that are redundant but different,</p>
+</li>
+<li><p>it outputs a CSV file that tells me what it did &#40;or plans to do if running in dry mode&#41;,</p>
+</li>
+<li><p>it can use the output of a dry run to actually move the files, which means I can have a look at what it&#39;s going to do before breaking everything.</p>
+</li>
+</ul>
+<p>Thanks to <a href="https://github.com/timholy/ProgressMeter.jl">ProgressMeter.jl</a> I also have nice outputs.</p>
+<pre><code class="language-bash">✓ Indexing /run/media/klafyvel/TOSHIBA EXT/Vidéos files...    Time: 0:00:01
+◑ Processing files...    Time: 0:01:25
+  decision:  keep
+  file:      TPS/interviews/son/MONO-021.wav
+  reason:    Same file at same location</code></pre>
+<p>The process is quite long, so grab a book if you&#39;re gonna use the script. For my video folder, it took 42 minutes. The nice thing with having a CSV file outputed is I can have some statistics, who doesn&#39;t like statistics? And here you can see that indeed, I had a lot of duplicated stuff in my video folder:</p>
+<pre><code class="language-julia">Row │ decision  count
+     │ String7   Int64
+─────┼─────────────────
+   1 │ keep       2646
+   2 │ copy          2
+   3 │ ignore        1</code></pre>
+ ]]>
+  </content:encoded>
+    
+  <pubDate>Sat, 27 Jul 2024 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>Hugo Levy-Falk</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
     <![CDATA[  I am defending my PhD thesis on the 24/01&#33;  ]]>
   </title>
   <link> https://klafyvel.me/blog/articles/soutenance/en/index.html </link>
@@ -341,7 +410,7 @@ a &\approx& 0.311
 </table>
  <hr /></p>
 <h1 id="table_of_contents">Table of contents</h1>
-<div class="franklin-toc"><ol><li>Table of contents</li><li>Why reinvent the wheel?<ol><li>Because I did not know how to implement the FFT.</li><li>Because I thought it was possible to do better.<ol><li>In-place or out-of-place algorithm?</li><li>Trigonometry can be <em>blazingly fast</em>. 🚀🚀🚀 🔥🔥</li></ol></li></ol></li><li>Interlude: some tooling for debugging.<ol><li>Using <code>arduino-cli</code> to upload your code.</li><li>Don&#39;t bother with communication protocols over Serial.</li></ol></li><li>Fast, accurate FFT, and other floating-point trickeries.<ol><li>A first dummy implementation of the FFT.</li><li>Forbidden occult arts are fun. 😈</li><li>Approximate floating-point FFT.</li></ol></li><li>How fixed-point arithmetic came to the rescue.<ol><li>Fixed-point multiplication.</li><li>Controlled result growth.</li><li>Trigonometry is demanding.</li><li>Saturating additions. &#40;a.k.a. &quot;Trigonometry is demanding&quot; returns.&#41;</li><li>Calculating modules with a chainsaw.</li><li>16 bits fixed-point FFT.</li><li>8 bits fixed-point FFT.</li><li>Implementing fixed-point FFT for longer inputs</li></ol></li><li>Benchmarking all these solutions.</li><li>Closing thoughts.</li></ol></div>
+<div class="franklin-toc"><ol><li>Table of contents</li><li>Why reinvent the wheel?<ol><li>Because I did not know how to implement the FFT.</li><li>Because I thought it was possible to do better.<ol><li>In-place or out-of-place algorithm?</li></ol></li><li>Trigonometry can be <em>blazingly fast</em>. 🚀🚀🚀 🔥🔥</li></ol></li><li>Interlude: some tooling for debugging.<ol><li>Using <code>arduino-cli</code> to upload your code.</li><li>Don&#39;t bother with communication protocols over Serial.</li></ol></li><li>Fast, accurate FFT, and other floating-point trickeries.<ol><li>A first dummy implementation of the FFT.</li><li>Forbidden occult arts are fun. 😈</li><li>Approximate floating-point FFT.</li></ol></li><li>How fixed-point arithmetic came to the rescue.<ol><li>Fixed-point multiplication.</li><li>Controlled result growth.</li><li>Trigonometry is demanding.</li><li>Saturating additions. &#40;a.k.a. &quot;Trigonometry is demanding&quot; returns.&#41;</li><li>Calculating modules with a chainsaw.</li><li>16 bits fixed-point FFT.</li><li>8 bits fixed-point FFT.</li><li>Implementing fixed-point FFT for longer inputs</li></ol></li><li>Benchmarking all these solutions.</li><li>Closing thoughts.</li></ol></div>
 <hr />
 <h1 id="why_reinvent_the_wheel">Why reinvent the wheel?</h1>
 <p>As I said in the introduction, I explicitly researched an implementation of the FFT because I did not want to implement my own. So what changed my mind ?</p>
@@ -833,7 +902,7 @@ Status &#96;/tmp/jl_AEhNcq/Project.toml&#96;
 </table>
  <hr /></p>
 <h1 id="table_of_contents">Table of contents</h1>
-<div class="franklin-toc"><ol><li>Table of contents</li><li>Some reminders on the discrete Fourier transform<ol><li>The Fourier transform</li><li>From the Fourier transform to the discrete Fourier transform</li><li>Calculating the discrete Fourier transform</li><li>Why a fast Fourier transform algorithm?</li></ol></li><li>Implementing the FFT<ol><li>My first FFT</li><li>Analysis of the first implementation</li><li>Calculate the reverse permutation of the bits</li><li>My second FFT</li><li>The special case of a real signal<ol><li>Property 1: Compute the Fourier transform of two real functions at the same time</li><li>Property 2 : Compute the Fourier transform of a single function</li><li>Calculation in place</li></ol></li><li>An FFT for the reals</li><li>Optimization of trigonometric functions</li></ol></li></ol></div>
+<div class="franklin-toc"><ol><li>Table of contents</li><li>Some reminders on the discrete Fourier transform<ol><li>The Fourier transform</li><li>From the Fourier transform to the discrete Fourier transform</li><li>Calculating the discrete Fourier transform</li><li>Why a fast Fourier transform algorithm?</li></ol></li><li>Implementing the FFT<ol><li>My first FFT</li><li>Analysis of the first implementation</li><li>Calculate the reverse permutation of the bits</li><li>My second FFT</li><li>The special case of a real signal<ol><li>Property 1: Compute the Fourier transform of two real functions at the same time</li></ol></li><li>Property 2 : Compute the Fourier transform of a single function</li><li>Calculation in place</li><li>An FFT for the reals</li><li>Optimization of trigonometric functions</li></ol></li></ol></div>
 <hr />
 <h1 id="some_reminders_on_the_discrete_fourier_transform">Some reminders on the discrete Fourier transform</h1>
 <p>The discrete Fourier transform is a transformation that follows from the Fourier transform and is, as its name indicates, adapted for discrete signals. In this first part I propose to discover how to build the discrete Fourier transform and then understand why the fast Fourier transform is useful.</p>
