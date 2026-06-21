@@ -39,7 +39,7 @@ academics)
             at <a href="https://www.lumin.universite-paris-saclay.fr/fr">Laboratoire LuMIn</a>
           </p>
           <p id="social">
-            <a href="https://social.sciences.re/@klafyvel" class="icon is-large">
+            <a href="https://social.sciences.re/@klafyvel" class="icon is-large" rel="me">
               <img src="assets/logo-mastodon.svg" alt="@klafyvel@social.sciences.re"/>
             </a>
             <a href="https://www.linkedin.com/in/hugo-levy-falk/" class="icon is-large">
